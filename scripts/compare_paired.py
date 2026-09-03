@@ -35,6 +35,34 @@ def load(path: Path) -> dict[str, dict[str, str]]:
     return keyed
 
 
+def paired_rate_interval(
+    before: dict[str, dict[str, str]],
+    after: dict[str, dict[str, str]],
+    seeds: list[str],
+    draws: int = 2000,
+) -> tuple[float, float]:
+    """95 % bootstrap interval on the difference of pooled life per room.
+
+    The two policies are resampled on the same dungeons at once, so the
+    layouts' share of the variance drops out here as it does for the means.
+    """
+    import random
+
+    rng = random.Random(0)
+    n = len(seeds)
+    diffs = []
+    for _ in range(draws):
+        picked = [seeds[rng.randrange(n)] for _ in range(n)]
+        rate = []
+        for table in (before, after):
+            lost = sum(float(table[s]["hp_lost"]) for s in picked)
+            rooms = sum(float(table[s]["rooms"]) for s in picked)
+            rate.append(lost / max(1.0, rooms))
+        diffs.append(rate[1] - rate[0])
+    diffs.sort()
+    return diffs[int(0.025 * draws)], diffs[int(0.975 * draws) - 1]
+
+
 def main() -> None:
     args = parse_args()
     before = load(args.before)
@@ -62,10 +90,14 @@ def main() -> None:
     rooms_b = sum(float(after[s]["rooms"]) for s in seeds)
     lost_a = sum(float(before[s]["hp_lost"]) for s in seeds)
     lost_b = sum(float(after[s]["hp_lost"]) for s in seeds)
+    low, high = paired_rate_interval(before, after, seeds)
     print()
     print(
         f"life lost per room: {lost_a / max(1, rooms_a):.3f} -> "
-        f"{lost_b / max(1, rooms_b):.3f}"
+        f"{lost_b / max(1, rooms_b):.3f} "
+        f"(diff {lost_b / max(1, rooms_b) - lost_a / max(1, rooms_a):+.3f}, "
+        f"95 % [{low:+.3f}, {high:+.3f}] -> "
+        f"{'real' if low > 0 or high < 0 else 'noise'})"
     )
     wins_a = sum(1 for s in seeds if before[s]["outcome"] == "victory")
     wins_b = sum(1 for s in seeds if after[s]["outcome"] == "victory")

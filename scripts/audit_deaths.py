@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT))
 from src.dqn import DQNAgent
 from src.eos_env import ACTIONS, EclipseEnv
 from src.features import featurize
-from src.policies import heuristic_action
+from src.policies import heuristic_action, heuristic_decision
 
 
 DEFAULT_OUTPUT = ROOT / "reports" / "death_audit.csv"
@@ -37,7 +37,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--policy",
         default="heuristic",
-        help="'heuristic' or the path to a saved agent (JSON).",
+        help="'heuristic' (keyboard aim, eight rays), 'teacher' (the same "
+        "rules with the mouse aim; options after a colon, e.g. "
+        "'teacher:lead,priority,fire') or the path to a saved agent (JSON).",
     )
     parser.add_argument("--episodes", type=int, default=20)
     parser.add_argument("--max-steps", type=int, default=9000)
@@ -66,6 +68,18 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def teacher_options(spec: str) -> dict[str, bool]:
+    """'teacher:lead,priority' -> the keyword flags of heuristic_decision."""
+    names = {"lead": "lead", "priority": "priority", "fire": "always_fire"}
+    options = {flag: False for flag in names.values()}
+    _, _, tail = spec.partition(":")
+    for token in filter(None, tail.split(",")):
+        if token not in names:
+            raise SystemExit(f"unknown teacher option {token!r} (choose from {sorted(names)})")
+        options[names[token]] = True
+    return options
+
+
 def _boss_attack(obs) -> tuple[str | None, str | None]:
     """Name of the boss on screen and the attack it is running, if any."""
     for enemy in obs.enemies:
@@ -78,7 +92,12 @@ def audit_shard(job: dict) -> dict:
     """Play a slice of the episodes in one browser and return its tables."""
     cfg = job["cfg"]
     agent = None
-    if cfg["policy"] != "heuristic":
+    teacher = None
+    if cfg["policy"] == "heuristic":
+        pass
+    elif cfg["policy"].startswith("teacher"):
+        teacher = teacher_options(cfg["policy"])
+    else:
         agent = DQNAgent.load(Path(cfg["policy"]))
 
     hits: list[dict[str, object]] = []
@@ -111,7 +130,10 @@ def audit_shard(job: dict) -> dict:
             stall_room = obs.room_type
 
             while not done and steps < cfg["max_steps"]:
-                if agent is None:
+                aim = None
+                if teacher is not None:
+                    action, aim = heuristic_decision(obs, **teacher)
+                elif agent is None:
                     action = heuristic_action(obs)
                 else:
                     action = agent.act(featurize(obs, previous), epsilon=cfg["epsilon"])
@@ -119,7 +141,7 @@ def audit_shard(job: dict) -> dict:
                     action = "noop"
                 before = obs
                 previous = obs
-                obs, _reward, done, _info = env.step(action)
+                obs, _reward, done, _info = env.step(action, aim)
                 steps += 1
 
                 # A run that stops clearing rooms is burning its budget just
@@ -151,16 +173,21 @@ def audit_shard(job: dict) -> dict:
                         }
                         print(f"  STALL {stall_detail}", flush=True)
 
-                if obs.hp < before.hp and obs.state == "play":
+                # The fatal blow counts too: the game names its author before
+                # switching to the game-over screen, and a table that stops
+                # one hit short of every death undercounts the runs' end.
+                if obs.hp < before.hp:
                     boss, attack = _boss_attack(before)
+                    hp_left = max(0, obs.hp)
                     hits.append(
                         {
                             "episode": episode,
                             "step": steps,
                             "floor": before.floor,
                             "room_type": before.room_type,
-                            "lost": before.hp - obs.hp,
-                            "hp_left": obs.hp,
+                            "lost": before.hp - hp_left,
+                            "hp_left": hp_left,
+                            "fatal": obs.state == "gameover",
                             "killer": obs.killer,
                             "killer_was_boss": obs.killer_was_boss,
                             "boss": boss,
@@ -226,7 +253,7 @@ def audit_shard(job: dict) -> dict:
 
 def main() -> None:
     args = parse_args()
-    if args.policy != "heuristic":
+    if args.policy != "heuristic" and not args.policy.startswith("teacher"):
         probe = DQNAgent.load(Path(args.policy))
         print(
             f"policy={args.policy} features={probe.n_features} "
@@ -234,7 +261,7 @@ def main() -> None:
             flush=True,
         )
     else:
-        print("policy=heuristic", flush=True)
+        print(f"policy={args.policy}", flush=True)
 
     cfg = {
         "policy": args.policy,
@@ -274,13 +301,39 @@ def main() -> None:
     # One row per episode, with its seed: what scripts/compare_paired.py
     # reads to set two policies side by side on the same dungeons.
     episodes_path = episodes_output(args.output)
-    with episodes_path.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=list(episodes[0]))
-        writer.writeheader()
-        writer.writerows(episodes)
+    if episodes:
+        with episodes_path.open("w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=list(episodes[0]))
+            writer.writeheader()
+            writer.writerows(episodes)
 
     _report(hits, arrivals, episodes, args.output)
     print(f"episodes={episodes_path}")
+
+
+def life_per_room(episodes: list[dict], seed: int = 0) -> tuple[float, float, float]:
+    """Pooled life lost per room, with a 95 % bootstrap interval.
+
+    Summing over episodes before dividing weighs every room the same, so a
+    run that dies in its second room does not count as much as one that
+    clears forty. Resampling whole episodes keeps the dependence between a
+    run's hits and its rooms.
+    """
+    import random
+
+    rooms = [int(row["rooms"]) for row in episodes]
+    lost = [int(row["hp_lost"]) for row in episodes]
+    if not episodes:
+        return 0.0, 0.0, 0.0
+    point = sum(lost) / max(1, sum(rooms))
+    rng = random.Random(seed)
+    n = len(episodes)
+    draws = []
+    for _ in range(2000):
+        idx = [rng.randrange(n) for _ in range(n)]
+        draws.append(sum(lost[i] for i in idx) / max(1, sum(rooms[i] for i in idx)))
+    draws.sort()
+    return point, draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws)) - 1]
 
 
 def episodes_output(output: Path) -> Path:
@@ -336,9 +389,12 @@ def _report(
     total_rooms = sum(int(row["rooms"]) for row in episodes)
     # Going deeper naturally means taking more hits in absolute terms. What
     # says whether the policy got better at surviving is the rate.
+    point, low, high = life_per_room(episodes)
     print(
-        f"life lost: {total_lost} over {len(hits)} hits, "
-        f"{total_rooms} rooms cleared -> {total_lost / max(1, total_rooms):.2f} per room"
+        f"life lost: {total_lost} over {len(hits)} hits "
+        f"({sum(1 for h in hits if h.get('fatal'))} fatal), "
+        f"{total_rooms} rooms cleared -> {point:.3f} per room "
+        f"[{low:.3f}, {high:.3f}] 95 %"
     )
 
     per_floor: dict[int, int] = defaultdict(int)
