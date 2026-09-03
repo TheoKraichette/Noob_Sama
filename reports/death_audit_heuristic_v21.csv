@@ -1,0 +1,118 @@
+episode,step,floor,room_type,lost,hp_left,killer,killer_was_boss,boss,boss_attack,enemies,hazards,shots
+1,116,1,combat,1,5,Ossement fébrile,False,,,3,1,0
+1,302,1,combat,1,4,Exhumé,False,,,1,0,0
+1,487,1,combat,1,3,Exhumé,False,,,1,1,0
+1,718,1,combat,1,5,une éruption tellurique,False,,,5,1,0
+1,844,1,combat,1,4,Ossement fébrile,False,,,2,0,0
+1,1001,1,boss,2,3,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+1,1162,1,boss,1,2,un projectile ennemi,False,vorace,doubleRing,1,0,6
+2,60,1,combat,3,3,Ronce rampante (élite spectrale),False,,,4,0,0
+2,94,1,combat,1,2,Ronce rampante,False,,,4,0,0
+3,482,1,combat,1,5,une éruption tellurique,False,,,0,2,0
+3,918,2,combat,1,5,Grimoire déchaîné,False,,,3,0,0
+3,1010,2,combat,1,5,Grimoire déchaîné,False,,,3,0,1
+3,1234,2,combat,1,5,Traqueur,False,,,1,0,3
+3,1278,2,combat,1,4,Âme errante,False,,,3,0,0
+3,1872,2,combat,1,5,Grimoire déchaîné,False,,,7,0,0
+3,1895,2,combat,1,4,Grimoire déchaîné,False,,,6,0,6
+3,2224,2,combat,1,5,Grimoire déchaîné,False,,,2,0,1
+3,2263,2,combat,1,4,un projectile ennemi,False,,,2,0,3
+3,2532,2,combat,1,3,Traqueur,False,,,8,0,0
+3,2983,2,boss,1,3,Âme errante,False,tisseuse,,3,0,6
+3,2989,2,boss,1,2,Âme errante,False,tisseuse,,3,0,5
+3,3044,2,boss,1,1,un projectile ennemi,False,tisseuse,,2,0,4
+4,346,1,combat,1,5,Ronce rampante,False,,,3,0,0
+4,464,1,miniboss,1,4,Âme errante,False,,,1,0,0
+4,531,1,combat,1,5,Traqueur,False,,,5,0,0
+4,773,1,boss,1,4,un projectile ennemi,False,vorace,doubleRing,1,0,6
+4,783,1,boss,2,2,"Vorace, Gueule de la Crypte",True,vorace,,1,0,6
+5,360,1,combat,2,4,Traqueur,False,,,3,0,0
+6,314,1,combat,1,5,Traqueur,False,,,5,0,0
+6,727,1,boss,2,4,"Vorace, Gueule de la Crypte",True,vorace,,1,0,0
+6,872,1,boss,2,2,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+7,164,1,combat,1,5,une éruption tellurique,False,,,4,1,0
+7,169,1,combat,2,3,Âme errante (élite vampirique),False,,,4,0,0
+7,487,1,combat,1,5,une éruption tellurique,False,,,5,1,0
+7,502,1,combat,1,4,Exhumé,False,,,5,0,0
+7,855,1,boss,1,3,un projectile ennemi,False,vorace,,1,0,6
+7,865,1,boss,2,1,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,2
+8,537,1,combat,1,5,Exhumé,False,,,3,0,0
+8,768,1,boss,1,5,un projectile ennemi,False,vorace,,1,0,6
+8,811,1,boss,2,3,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+8,938,1,boss,2,1,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,2,0
+9,373,1,combat,1,5,Traqueur,False,,,2,0,0
+9,739,1,boss,1,5,une éruption tellurique,False,sylve,,1,4,0
+9,758,1,boss,1,5,un projectile ennemi,False,sylve,,1,0,5
+9,853,1,boss,1,4,une éruption tellurique,False,sylve,,3,6,0
+9,968,1,boss,1,3,Ronce rampante,False,sylve,summonWave,2,0,0
+9,994,1,boss,1,2,un projectile ennemi,False,sylve,,3,0,4
+9,1113,1,boss,1,1,une éruption tellurique,False,sylve,,2,4,0
+10,80,1,combat,2,4,Ronce rampante,False,,,3,0,0
+10,177,1,combat,2,3,Ronce rampante,False,,,3,0,0
+10,197,1,combat,1,2,Ronce rampante,False,,,2,1,0
+10,728,1,boss,1,5,Ronce rampante,False,sylve,,4,0,0
+10,940,1,boss,1,5,une éruption tellurique,False,sylve,,1,4,0
+10,944,1,boss,1,4,une éruption tellurique,False,sylve,,1,1,0
+10,1082,1,boss,1,4,un projectile ennemi,False,sylve,,2,1,4
+10,1287,1,boss,1,3,un projectile ennemi,False,,,0,0,6
+10,1360,2,combat,1,2,Grimoire déchaîné,False,,,3,0,2
+10,1642,2,combat,1,1,Grimoire déchaîné,False,,,4,0,2
+11,194,1,combat,1,5,Ossement fébrile,False,,,2,1,0
+11,537,1,miniboss,2,3,Traqueur (élite vampirique),False,,,3,0,0
+11,705,1,boss,2,3,"Vorace, Gueule de la Crypte",True,vorace,,1,0,0
+11,778,1,boss,2,1,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+12,57,1,combat,2,4,Ronce rampante,False,,,2,0,0
+12,602,1,miniboss,2,4,Traqueur (élite spectrale),False,,,2,0,0
+12,635,1,miniboss,2,2,Traqueur (élite spectrale),False,,,1,0,0
+12,781,1,boss,2,2,"Vorace, Gueule de la Crypte",True,vorace,,1,0,0
+13,888,2,combat,1,5,Grimoire déchaîné,False,,,2,0,3
+13,894,2,combat,1,4,un projectile ennemi,False,,,1,0,6
+13,1037,2,combat,1,5,Âme errante,False,,,3,0,0
+13,1041,2,combat,1,4,Âme errante,False,,,3,0,0
+13,1316,2,combat,1,5,Âme errante,False,,,2,0,0
+13,1603,2,boss,1,6,un projectile ennemi,False,tisseuse,summonWave,1,0,5
+13,1669,2,boss,1,5,Âme errante,False,,,4,0,6
+13,1684,2,boss,1,4,Âme errante,False,tisseuse,,2,0,6
+13,1726,2,boss,1,3,un projectile ennemi,False,tisseuse,mirrorEcho,3,0,4
+13,1809,2,boss,1,2,un projectile ennemi,False,,,4,0,2
+13,1820,2,boss,1,1,Âme errante,False,,,4,0,0
+14,840,1,boss,2,4,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+14,998,1,boss,2,2,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+14,1023,1,boss,1,1,un projectile ennemi,False,vorace,,1,0,6
+15,84,1,combat,2,4,Exhumé (élite glaciale),False,,,2,0,0
+15,147,1,combat,2,2,Exhumé (élite glaciale),False,,,1,0,0
+16,787,1,boss,1,5,une éruption tellurique,False,,,0,6,0
+16,841,2,combat,1,4,Grimoire déchaîné,False,,,4,0,0
+16,881,2,combat,1,3,Grimoire déchaîné,False,,,2,0,6
+16,901,2,combat,1,3,un projectile ennemi,False,,,0,0,6
+16,1034,2,combat,1,2,Grimoire déchaîné,False,,,5,0,0
+16,1091,2,combat,1,1,un projectile ennemi,False,,,4,0,1
+16,1434,2,combat,1,1,Grimoire déchaîné,False,,,2,0,3
+17,382,1,miniboss,2,4,Traqueur (élite invocatrice),False,,,4,0,0
+17,390,1,miniboss,1,3,Âme errante,False,,,4,0,0
+17,524,1,combat,1,4,Ronce rampante,False,,,2,0,0
+17,570,1,combat,1,3,Âme errante,False,,,1,0,0
+17,710,1,combat,2,2,Traqueur,False,,,1,0,0
+17,955,1,boss,2,1,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+18,184,1,combat,2,4,Âme errante (élite spectrale),False,,,3,0,0
+18,190,1,combat,1,3,Âme errante,False,,,3,1,0
+18,199,1,combat,1,2,Âme errante,False,,,2,0,0
+18,217,1,combat,1,2,Ossement fébrile,False,,,1,0,0
+18,883,1,boss,2,2,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+18,1082,2,combat,1,1,Grimoire déchaîné,False,,,4,0,0
+18,1726,2,combat,2,3,Golem sépulcral,False,,,4,0,2
+18,1905,2,boss,1,2,un projectile ennemi,False,zenith,,1,0,6
+18,1981,2,boss,1,1,un projectile ennemi,False,zenith,,1,0,6
+19,147,1,combat,1,5,Ossement fébrile,False,,,2,0,0
+19,540,1,miniboss,2,3,Traqueur (élite vampirique),False,,,3,0,0
+19,820,1,boss,1,4,une éruption tellurique,False,colosse,aftershock,1,6,0
+19,833,1,boss,2,2,Le Colosse d’Ossements,True,colosse,,1,0,0
+20,305,1,combat,1,5,Ossement fébrile,False,,,1,0,0
+20,370,1,combat,1,4,Ossement fébrile,False,,,2,0,0
+20,842,1,boss,1,5,une éruption tellurique,False,colosse,,1,6,0
+20,870,1,boss,1,5,Âme errante,False,colosse,,3,0,0
+20,973,1,boss,1,4,une éruption tellurique,False,colosse,,1,6,0
+20,990,1,boss,1,3,une éruption tellurique,False,colosse,slamQuake,1,0,0
+20,1019,1,boss,1,2,une éruption tellurique,False,colosse,aftershock,1,6,0
+20,1268,2,combat,1,2,Âme errante,False,,,1,0,0
+20,1328,2,combat,1,1,Grimoire déchaîné,False,,,5,0,0

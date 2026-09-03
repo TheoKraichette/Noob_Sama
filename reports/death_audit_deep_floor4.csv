@@ -1,0 +1,30 @@
+episode,step,floor,room_type,lost,hp_left,killer,killer_was_boss,boss,boss_attack,enemies,hazards,shots
+1,95,4,combat,2,2,Spectre,False,,,6,0,1
+2,501,4,combat,2,4,Âme errante,False,,,5,0,3
+2,797,4,combat,2,3,Âme errante,False,,,7,0,0
+3,420,4,combat,2,3,Âme errante,False,,,11,0,1
+3,504,4,combat,1,2,Revenant gelé,False,,,8,0,1
+3,550,4,combat,1,1,Revenant brisé,False,,,9,0,2
+4,347,4,combat,2,2,un projectile ennemi,False,,,1,0,1
+4,1156,4,combat,2,2,Âme errante,False,,,9,0,0
+5,58,4,combat,2,3,Spectre,False,,,9,0,0
+5,66,4,combat,2,1,Spectre,False,,,9,0,0
+6,158,4,combat,1,9,Revenant brisé,False,,,2,0,0
+6,324,4,combat,2,7,Revenant gelé,False,,,7,0,1
+6,757,4,combat,2,7,Âme errante,False,,,5,0,0
+6,764,4,combat,2,5,Âme errante,False,,,5,0,0
+6,956,4,combat,2,4,Revenant gelé,False,,,6,0,0
+6,1142,4,combat,2,3,Traqueur,False,,,7,0,0
+6,1152,4,combat,2,1,Traqueur,False,,,6,0,1
+7,94,4,combat,2,3,Âme errante,False,,,5,0,2
+7,382,4,combat,1,3,Âme errante,False,,,9,0,1
+8,51,4,combat,2,3,Âme errante,False,,,6,0,1
+8,116,4,combat,2,1,Âme errante,False,,,5,0,1
+9,511,4,combat,1,5,Revenant brisé,False,,,6,0,0
+9,658,4,combat,1,5,Revenant gelé,False,,,9,0,0
+9,672,4,combat,2,3,Revenant gelé,False,,,9,0,0
+9,682,4,combat,2,1,Âme errante,False,,,9,0,0
+10,206,4,combat,1,3,Revenant brisé,False,,,4,0,0
+10,371,4,combat,3,2,Âme errante (élite invocatrice),False,,,8,0,0
+11,56,4,scelle,3,1,Revenant gelé (élite spectrale),False,,,5,0,0
+12,51,4,combat,3,1,Âme errante (élite explosive),False,,,7,0,0
