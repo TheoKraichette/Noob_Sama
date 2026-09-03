@@ -231,21 +231,506 @@ python scripts/train_bc.py --demos data/demos.npz data/dagger1.npz --hidden 256 
 python scripts/watch_dqn.py --agent models/bc_agent.json --episodes 3
 ```
 
+## Phase 3 - viser la run complete
+
+Changement d'objectif : ne plus battre la baseline, mais **terminer le jeu**,
+c'est-a-dire atteindre l'etat `victory`. La lecture du code du jeu donne la
+taille reelle de la cible : `FINAL_FLOOR = 5`, etages de 8/9/10/11/8 salles,
+soit 46 salles et 5 gardiens, ~15-19 min de jeu annoncees par les auteurs.
+A 0.13 s de jeu par step, une run complete coute environ **9 000 steps** : le
+budget de 900 de la phase 2 en couvrait un huitieme, la victoire y etait
+impossible par construction, pas par faiblesse de l'agent.
+
+Nouveau protocole : **20 episodes x 9 000 steps**, baseline aleatoire
+re-mesuree dessus : **34.11** (min 2.13, max 134.95, ecart-type 32.83 ;
+`reports/random_baseline_9000.csv`). L'aleatoire meurt dans 19 cas sur 20 -
+il ne campe plus, il sort de la salle de depart et se fait tuer.
+
+Trois corrections de protocole accompagnent le changement :
+
+- **Sauvegarde vierge a chaque episode.** Le jeu conserve une meta-progression
+  dans `localStorage` (heros debloques, eclats, Sanctuaire). Elle s'accumulait
+  silencieusement entre les episodes d'une meme session : les derniers
+  tournaient sur un personnage plus fort que les premiers, et que la baseline.
+  Le stockage est desormais vide a chaque chargement de page (verifie :
+  `runs = 1`, `shards = 0`, aucun heros debloque a chaque reset).
+- **Curriculum d'entrainement.** `reset(start_floor=n)` demarre un episode
+  d'ENTRAINEMENT a un etage donne avec un build plausible, tire par le
+  generateur d'objets du jeu lui-meme. Interdit en evaluation, ou une
+  assertion verifie etage 1 et inventaire vide.
+- **Audit des morts** (`scripts/audit_deaths.py`) : une ligne par point de vie
+  perdu, avec le coupable nomme par le jeu (`killerName`), l'etage, la salle
+  et l'attaque de boss en cours. Toutes les decisions ci-dessous en viennent.
+
+### Le professeur, mesure par mesure
+
+| Version | Changement teste | Score | Signal | Decision |
+| --- | --- | --- | --- | --- |
+| Baseline | Agent aleatoire, 20 x 9 000 | 34.11 | 19/20 morts, 0 salle | Reference |
+| V21 | Etat de la phase 2, re-mesure sur 9 000 | 148.01 | 19/20 morts, 13 runs meurent des l'etage 1 ; 111 des 149 PV perdus a l'etage 1 | Point de depart |
+| V22 | Champ de danger : 16 directions x 3 distances, agrege sur TOUS les dangers cote JS | 174.34 | Morts 19 -> 14, PV perdus 149 -> 117, eruptions 15 -> 7, ronces 12 -> 8 | Adopte |
+| V23 | Reponses par attaque de gardien (14 attaques ajoutees) | 189.24 | Etage 3 atteint pour la premiere fois, blocages 6 -> 1 - mais PV 117 -> 154 et `heavyCharge` 14 -> 28 | Adopte, timing a corriger |
+| V24 | Timing : dasher APRES le verrouillage de visee, pas pendant | 208.46 | Vorace 40 -> 20 PV (`heavyCharge` 28 -> 16, `tripleLunge` 12 -> 4), 0.82 PV perdu par salle, etage 2 dans 12/20 | Adopte |
+| V25 | Anti-blocage + ligne de vue sur les piliers + competence du heros + portee de ramassage | 225.59 | **Blocages 5/20 -> 0/20**, aucun budget epuise, 165 salles au lieu de 141 - mais 1.04 PV par salle | Adopte, competence a restreindre |
+| V26 | Build et economie : ramasser le butin des salles scellees, autel du sacrifice, choix d'objet par rarete, boutique qui garde l'or pour les coeurs ; competence restreinte | **272.83** | Etages atteints 1:4 2:13 3:3 (contre 1:8 2:10 3:2), 185 salles, meilleur episode 683.9 | Adopte |
+| V27 | Esquive dimensionnee : dash calcule sur la distance a couvrir, traversee d'un mur d'orbes | 252.30 | Aucun gain, 1.02 PV par salle | **Essai negatif, reverti** |
+| V28 | Retrait des seules regles qui consomment du dash | **272.06** | **1 victoire sur 20**, meilleur episode 1038.7, 0.99 PV par salle (record), 0 blocage | **Adopte - professeur retenu** |
+| V29 | Garder la moitie cardinale d'un deplacement diagonal au lieu de tirer sur place | 183.69 | 1.19 PV par salle, 12 runs sur 20 meurent des l'etage 1 | **Essai negatif, reverti** |
+
+### V22 - ce que l'agent ne pouvait pas voir
+
+L'observation tronquait les menaces a `shots[:6]` et `hazards[:6]`. Or
+`aftershock` pose 19 zones d'un coup, `frostNova` 16, `tidalPulse` tire 27
+orbes : pendant les attaques qui tuent, l'agent voyait un tiers du danger.
+
+Relever les plafonds ne suffisait pas - une liste de 20 zones n'est pas une
+representation exploitable par un reseau de taille fixe. L'environnement
+calcule donc un **champ de danger** : pour 16 directions et 3 distances de
+projection, un score agrege sur toutes les zones (en tenant compte de leur
+meche restante), tous les projectiles (point d'approche minimale sur leur
+trajectoire), tous les ennemis et les murs. 48 flottants qui rendent
+representable ce qu'une liste tronquee ne pouvait pas decrire. Le professeur
+consomme le meme champ, ce qui a supprime au passage une duplication de la
+logique de scoring cote Python.
+
+### V24 - une parade peut couter plus cher que l'absence de parade
+
+V23 a fait doubler les degats de `heavyCharge` alors qu'une reponse y etait
+codee. La lecture du registre d'attaques du jeu donne la raison : le gardien
+**suit le joueur jusqu'a `atkT = 0.5`**, verrouille, puis charge a 720 px/s a
+partir de 0.75. La parade s'declenchait a 0.35 - pendant la phase de suivi.
+Le gardien re-visait la nouvelle position, et le dash etait en recharge
+(0.85 s) au moment ou la charge partait vraiment.
+
+Attendre le verrouillage a divise les degats du gardien par deux. La lecon
+n'est pas « il fallait dasher » mais « il fallait dasher au bon moment », et
+ce moment n'etait pas observable avant que `attack_time` ne soit expose.
+
+### V25 - le blocage, un cout invisible dans la table des morts
+
+L'audit ne comptait que les degats. Or six episodes sur vingt epuisaient leur
+budget sans mourir : l'episode 17 de V22 a survecu 22 minutes de jeu en ne
+nettoyant que 5 salles. En ajoutant un compteur de steps sans progression, le
+diagnostic est tombe : jusqu'a **7 380 steps immobiles** - 82 % d'un budget -
+toujours dans une salle de type `combat`.
+
+Cause trouvee dans `room.js` : les salles de combat a partir de la profondeur 2
+contiennent des **piliers**, qui bloquent les deplacements *et* les
+projectiles (`Room.projectileBlocked`), et le biome Bibliotheque en aligne des
+rangees entieres. Rien de tout cela n'etait expose. L'agent tirait dans un
+pilier, indefiniment, avec l'ennemi derriere.
+
+Correctifs : exposition des piliers, calcul d'une ligne de vue par ennemi,
+prise en compte des piliers dans le champ de danger, deplacement lateral quand
+la ligne de tir est bouchee, et detecteur de blocage generique. Blocages :
+5/20 -> 0/20.
+
+### V26 - le professeur payait le prix des salles sans en prendre la recompense
+
+La politique refusait toute interaction dans les salles dites « risquees »
+(`altar`, `defi`, `scelle`, `gambler`). En lisant `game.js`, cette regle
+melangeait deux choses tres differentes :
+
+- **declencher** une epreuve optionnelle (le brasier chronometre, le parieur,
+  l'autel qui coute un coeur) - un vrai risque ;
+- **ramasser** un butin deja pose sur un piedestal - aucun risque du tout.
+
+La salle scellee fait combattre deux elites renforcees et depose une relique
+epique au nettoyage. Le professeur menait le combat entier, puis repartait
+sans la relique : tout le cout, aucune recompense. Meme chose pour la salle de
+defi.
+
+Avec le butin repris, le choix d'objet classe par rarete (prendre un objet sur
+un piedestal fait disparaitre les autres : le plus proche est rarement le bon),
+l'autel accepte quand la barre de vie le permet, et une boutique qui garde
+l'or pour les coeurs quand la vie manque : **225.6 -> 272.8**, et le nombre de
+runs qui meurent des l'etage 1 tombe de 8 a 4.
+
+### V27-V28 - le dash est un budget, pas un reflexe
+
+V27 ajoutait deux regles qui dashent davantage : sortir d'une zone quand le
+calcul montre que la marche ne suffit pas, et traverser un mur d'orbes a
+l'invulnerabilite. Les deux sont justes prises isolement, et pourtant le score
+est descendu de 272.8 a 252.3.
+
+Explication : le dash a **0.85 s de recharge**. Chaque dash depense sur un
+orbe est un dash absent sous la charge du gardien, qui est l'attaque la plus
+chere du jeu. En retirant ces deux regles et en gardant les parties gratuites
+de V27 (choisir la zone a la meche la plus courte, offrir le recul comme
+troisieme option d'esquive), le score revient a 272.1 avec le meilleur taux de
+degats jamais mesure - **0.99 point de vie perdu par salle** - et la
+**premiere victoire** du projet.
+
+Episode victorieux : 5 etages, 32 salles, 227 ennemis vaincus, **13 objets**,
+score 1038.7. Les runs qui meurent a l'etage 1 en ont 1. Le build n'est pas un
+detail de confort, c'est la variable qui decide de la run.
+
+### V29 - un defaut evident qui n'en etait pas un
+
+L'espace d'actions ne contient pas de combinaison deplacement-diagonal + tir.
+Face a une direction diagonale, `_combine` abandonnait donc le deplacement et
+tirait sur place - s'immobiliser en plein combat, ce qui ressemble beaucoup a
+un defaut. Garder la moitie cardinale la moins dangereuse semblait
+strictement meilleur.
+
+Mesure : **272.1 -> 183.7**, et douze runs sur vingt meurent des l'etage 1 au
+lieu de six. La moitie conservee n'eloigne pas de la menace, elle longe : un
+recul « bas-gauche » reduit a « bas » suit l'ennemi au lieu de le fuir. Tirer
+sur place garde au moins les degats sur la cible.
+
+Essai reverti. C'est le meilleur exemple du carnet qu'un raisonnement
+convaincant ne remplace pas une mesure.
+
+### Sonde de profondeur - ce que le curriculum revele
+
+`audit_deaths.py --start-floor 4` fait jouer le professeur directement a
+l'etage 4 avec un build plausible. Resultat : **12 episodes sur 12 se
+terminent par une mort**, 16 salles nettoyees au total, et **3.38 points de
+vie perdus par salle** contre environ 1.0 aux etages 1 et 2.
+
+C'est une mesure, pas une impression : la difficulte de fin de run
+(vie des ennemis x4.2, degats de contact +1, tirs a 2 points) est d'un autre
+ordre. Le plafond du professeur n'est donc pas « arriver a l'etage 4 » mais
+« y survivre ».
+
+### L'agent appris
+
+Meme protocole, meme score, meme budget. Les colonnes « salles » et « etages »
+sont des totaux sur les 20 episodes.
+
+| Version | Agent | Score | Salles | Etages | Blocages | Decision |
+| --- | --- | --- | --- | --- | --- | --- |
+| V30 | Clonage sur 243 751 paires (180 episodes, dont un tiers en curriculum d'etage) | 186.95 | 117 | 9 | 5/20 | Score flatteur, voir ci-dessous |
+| V31 | + une ronde DAgger (193 116 paires) | 159.02 | 127 | 8 | **0/20** | Adopte malgre le score |
+| V32 | Auto-imitation iteree, 10 rondes de 48 episodes | 158.36 | 131 | 8 | 0/20 | Essai neutre |
+| V33 | + une deuxieme ronde DAgger (144 571 paires) | **181.42** | **137** | **10** | 2/20 | **Modele retenu** |
+| V34 | Affinage RL (DQfD) depuis le champion d'auto-imitation, 160 episodes | 198.04 | 97 | 5 | 13/20 | **Essai negatif : le score monte, le jeu recule** |
+
+### V30-V31 - quand le score recompense l'immobilite
+
+Le premier clone marque 186.95, le clone corrige par DAgger seulement 159.02.
+En metriques de jeu, le second est pourtant nettement meilleur : **127 salles
+au lieu de 117, en moins de la moitie des steps** (29 885 contre 73 493) et
+sans un seul blocage.
+
+L'ecart vient du score lui-meme. Le terme `time * 0.1` paie 0.1 point par
+seconde survecue : un episode fige pendant tout son budget rapporte environ
+135 points de pure survie - davantage qu'une run honnete qui nettoie cinq
+salles et meurt. Cinq des vingt episodes du premier clone sont dans ce cas.
+
+C'est la pathologie de « camping » deja rencontree en V10, revenue par une
+autre porte. Le score n'a pas ete change : c'est le referentiel de comparaison
+avec la baseline, et le modifier obligerait a tout re-mesurer. En revanche,
+deux precautions ont ete prises :
+
+- l'audit et les tableaux affichent desormais **salles et etages** a cote du
+  score, parce que ces deux-la ne se gagnent pas en restant immobile ;
+- l'auto-imitation classe ses episodes sur la progression avant le score.
+  Sans cela, elle aurait appris a se figer, la meilleure strategie que le
+  score recompense.
+
+### V32 - l'auto-imitation, et l'importance de savoir refuser
+
+Principe : l'agent joue, on ne garde que le quart superieur de ses episodes,
+et on le re-entraine sur ce qu'il a fait dans ceux-la. C'est le mecanisme qui
+peut depasser le professeur, puisqu'il n'imite plus personne.
+
+Premiere version, echec net : la progression moyenne descend de 12.29 a 8.94
+puis 8.21 en trois rondes. Deux causes, toutes deux corrigees :
+
+1. La boucle avancait sans jamais **refuser** une ronde. Une mauvaise ronde
+   devenait le point de depart de la suivante, et l'erreur se composait.
+   Correctif : un pas qui ne joue pas mieux est annule, et la ronde suivante
+   repart du champion.
+2. Le pas d'apprentissage (2e-4, 6 epoques sur ~30 000 paires) sur-ajustait un
+   petit jeu de donnees d'elite. Correctif : 5e-5, 3 epoques, et autant de
+   paires de demonstration re-injectees que de paires fraiches.
+
+Deuxieme version : progression 12.10 -> **14.67** a la ronde 2, puis huit
+rondes consecutives refusees. Le champion de la ronde 2 marque 213.78 sur ses
+48 episodes de rollout - mais **158.36 au protocole complet**, soit
+exactement le niveau du modele de depart.
+
+Conclusion honnete : le gain apparent etait du bruit d'echantillonnage sur
+48 episodes, et selectionner sur une mesure bruitee revient a selectionner du
+bruit. L'auto-imitation n'a pas depasse l'imitation dans ce budget. Elle
+laisse tout de meme le meilleur rythme de progression mesure
+(4.59 salles pour 1 000 steps contre 4.25).
+
+### V33 - la deuxieme ronde DAgger
+
+Comme en phase 2, c'est la deuxieme ronde qui compte. Le champion de
+l'auto-imitation joue 120 episodes, l'heuristique etiquette chacun de ses
+etats (144 571 paires), et le reseau se re-entraine sur les trois jeux reunis
+(581 438 paires, precision de validation 83.7 %).
+
+Resultat : **181.42**, 137 salles, 10 etages franchis, et le premier clone a
+atteindre l'etage 3. C'est le modele retenu.
+
+L'ecart au professeur (272.06) ne se referme pas comme en phase 2. Deux
+raisons mesurables : l'espace d'actions est passe de 59 a 64 et l'etat de 109
+a 202 dimensions, ce qui rend l'imitation plus difficile a precision egale ;
+et le professeur tire desormais une part de sa force de decisions **rares**
+(prendre l'autel, classer trois reliques, garder l'or pour un coeur) qui
+n'apparaissent que quelques dizaines de fois dans 580 000 paires.
+
+### V34 - la passe RL, ou le score contre le jeu
+
+Affinage type DQfD depuis le champion d'auto-imitation : perte TD sur
+l'experience fraiche, ancre supervisee sur les 437 000 demonstrations,
+lr 5e-5, penalite de vie 1.5, un pas de gradient toutes les 4 transitions
+(sans quoi l'entrainement coute plus cher que la simulation). 160 episodes de
+9 000 steps, environ 4 h 30.
+
+La courbe d'evaluation monte franchement : 181.0 -> 179.7 -> 214.5 -> **262.0**
+a l'episode 160. Mesure au protocole complet de 20 episodes, le meme point de
+controle donne **198.04** - au-dessus du clone retenu (181.42). Le RL semble
+donc avoir gagne.
+
+Il n'a pas gagne. Les metriques de jeu du meme fichier :
+
+| | Score | Salles | Etages | Episodes a 9 000 steps | Salles / 1 000 steps |
+| --- | --- | --- | --- | --- | --- |
+| Clone V33 | 181.42 | **137** | **10** | 2/20 | **3.19** |
+| RL V34 | 198.04 | 97 | 5 | **13/20** | 0.70 |
+
+L'agent RL nettoie **30 %% de salles en moins** et franchit deux fois moins
+d'etages, tout en marquant plus. Il a appris a survivre sans jouer : sa
+recompense d'entrainement penalise les degats (-1.5 par point de vie) et paie
+peu la salle (+1 apres mise a l'echelle), donc l'optimum est d'eviter tout
+contact ; et le score de comparaison, lui, paie 0.1 par seconde survecue. Les
+deux se sont accordes contre le jeu.
+
+C'est la troisieme apparition du camping dans ce carnet (V10, V30, V34), et la
+plus instructive : cette fois il se cache derriere une amelioration du score.
+Sans les colonnes « salles » et « etages », l'essai aurait ete adopte.
+
+Modele retenu a l'issue de la phase 3 : **`models/bc_agent_v5.json`**, le
+clone a deux rondes DAgger. La phase 4 lui succede.
+
+## Phase 4 - la ou le professeur perdait vraiment ses coeurs
+
+Deux constats de depart, tous deux tires de la lecture du jeu et de l'audit,
+et non d'une impression :
+
+1. **Le joueur a 6 demi-coeurs** (`PLAYER_CFG.maxHp`), et le professeur en
+   perdait 1.0 par salle. Une run entiere fait 46 salles. Toute la partie se
+   joue donc sur les degats encaisses, pas sur le score.
+2. **171 des 261 coups recus l'etaient sans un seul projectile a l'ecran**, et
+   92 avec un seul ennemi present. Ce n'etait pas un probleme de perception ni
+   d'esquive : le professeur se faisait toucher au corps a corps par des
+   ennemis deux fois plus lents que lui.
+
+Le protocole de mesure change aussi : 20 episodes laissent une erreur type de
+~25 points sur la moyenne, qui masque tout ce qui est plus petit qu'elle.
+`audit_deaths.py` prend un `--workers`, les essais passent a 40 episodes, et
+la metrique de decision devient les **PV perdus par salle** — elle compte des
+centaines d'evenements au lieu de 40, donc son erreur est bien plus serree.
+
+### V35 - l'espace d'actions etait incomplet
+
+`js/core/input.js` resout le deplacement (`getMove`) et la visee (`getShoot`)
+sur deux axes **independants**. Maintenir W + A + Fleche-haut est donc une
+entree parfaitement legale — et il n'existait aucune action « diagonale +
+tir » dans les 64 disponibles. Verifie dans le navigateur avant d'y toucher :
+`vx=-205 vy=-205` (norme 290) avec `aim=[1,0]`.
+
+Consequence, mesuree sur 5 341 pas de combat reels : le professeur ne tirait
+que pendant **68,3 %** d'entre eux. Des que la direction de fuite etait
+diagonale — une fois sur deux — il lachait le tir et s'immobilisait, face a
+des poursuivants a 125 px/s quand lui en fait 290.
+
+32 actions ajoutees (4 diagonales x 8 directions de tir), 96 en tout. Le temps
+de tir monte a **92,6 %**.
+
+Resultat : **250.94** sur 40 episodes, et une regression cachee dans le
+detail : les degats de `heavyCharge` passent de 0,55 a 1,6 PV par episode.
+J'avais profite du changement pour ouvrir les huit directions au strafe
+defensif. Ce qu'une charge demande, c'est du terrain gagne **en travers** de
+sa ligne, et une diagonale n'en couvre que 0,707. Strafe defensif remis aux
+quatre cardinales.
+
+### V36 - le tir pendant l'esquive
+
+Meme trou, applique aux esquives : `_hazard_escape`, `_shot_dodge` et les
+reponses aux attaques de gardien ne tiraient que si leur pas etait cardinal.
+Or l'esquive occupe l'essentiel d'un combat de gardien.
+
+Resultat : **228.09 +/- 16.24**, 1,11 PV perdu par salle. Rien de gagne. Le
+tir supplementaire ne protege de rien par lui-meme — il fallait d'abord qu'il
+touche.
+
+### V37 - viser, c'est tourner autour de la cible
+
+La mesure qui explique tout le reste. Sur 4 948 tirs reels, **seuls 25,6 %
+pouvaient geometriquement atteindre leur cible** ; ecart lateral median
+52 px pour un corps et un orbe qui font ensemble 20 px.
+
+La cause est arithmetique : la visee clavier n'a que huit rayons, 45 degres
+d'ecart. Une cible a un demi-secteur du rayon est manquee de
+`r x sin(22.5 deg)`, soit 115 px a 300 px de distance. Il faut tomber a moins
+de 3,8 degres pres pour toucher a cette distance — environ un tir sur six.
+
+Et c'est exactement la que l'audit trouvait ses degats : entre 330 et 470 px,
+avec un seul ennemi et de la vie, l'ancienne regle repondait « rester
+immobile et tirer ». Rester immobile n'esquive rien et ne vise rien.
+
+Correctif : quand la cible n'est pas sur un rayon, **tourner autour d'elle**
+jusqu'a ce qu'elle y soit, sans jamais cesser de tirer. Le strafe defensif
+choisit desormais, entre ses deux perpendiculaires, celle qui referme l'angle.
+
+| | Score | Salles / ep. | PV / salle | Etage max | Victoires |
+| --- | --- | --- | --- | --- | --- |
+| V36 | 228.09 | 8.05 | 1.11 | 2 | 0/40 |
+| **V37** | **307.33** | **10.55** | **0.92** | **5** | **1/40** |
+
+Tirs pouvant toucher : 25,6 % -> **40,8 %**. Ecart lateral median 52 -> 31 px.
+Un seul blocage sur 40 episodes contre quatre.
+
+### V38 - anticiper le mouvement de la cible : essai negatif
+
+Suite logique : un orbe met `distance / 580` a arriver, soit une demi-seconde
+a 300 px, pendant laquelle la cible quitte sa propre boite de collision. Les
+vitesses ennemies ont donc ete exposees (`vx`, `vy`) et la visee portee sur le
+point d'impact plutot que sur la position courante.
+
+La visee s'ameliore bien : 42,7 % de tirs pouvant toucher, et surtout une
+queue de distribution qui s'effondre (q90 de 179 a 82 px). **Le jeu, lui, se
+degrade** : 1,01 PV perdu par salle contre 0,92, plus aucune victoire, etage 3
+au mieux.
+
+Explication : les poursuivants accelerent a 850 px/s2 et oscillent
+(`wobble`). Leur vitesse instantanee predit mal une demi-seconde, et comme le
+point vise pilote aussi le **deplacement** (c'est lui qu'on encercle), une
+prediction bruitee fait tourner la politique dans le vide. Anticipation
+abandonnee ; `vx` et `vy` restent dans les features, ou le reseau peut en
+faire ce qu'il veut.
+
+### V39 - choisir le bon rayon
+
+En separant les deux sous-changements de V38, il restait une correction pure.
+`_shoot_towards` choisissait une diagonale des que les deux ecarts depassaient
+45 px : une cible a 14 degres de l'horizontale, mais a plus de 45 px sur les
+deux axes, se voyait tirer dessus a 45 degres. Le rayon le plus proche du
+relevement est desormais choisi directement.
+
+**347.06 +/- 36.86**, 12,1 salles par episode, **0,84 PV perdu par salle**,
+aucun blocage sur 40 episodes, et les cinq etages atteints (1:8 2:19 3:8 4:3
+5:2) avec une victoire.
+
+### V40 - aller chercher le soin de plus loin : essai negatif
+
+L'economie du soin est le vrai plafond : six demi-coeurs pour quarante-six
+salles, une gemme sur trente ennemis, et neuf secondes avant qu'elle ne
+s'evapore. En combat, le professeur ne se detournait que pour un coeur a
+moins de 140 px. Porte a 340 px des que la barre est sous la moitie.
+
+**321.08**, 0,89 PV perdu par salle, aucune victoire : moins bien que V39 sur
+toutes les colonnes. Traverser une salle en combat pour un demi-coeur coute
+plus de vie qu'il n'en rend. Revert, et la borne d'origine est confirmee par
+la mesure plutot que par l'intuition qui l'avait posee.
+
+### Bilan de la sequence
+
+| Version | Score | Salles / ep. | PV / salle | Etage max | Victoires |
+| --- | --- | --- | --- | --- | --- |
+| Reference V34 (20 ep.) | 272.06 | 9.7 | 0.99 | 5 | 1/20 |
+| V36 tir pendant l'esquive | 228.09 | 8.05 | 1.11 | 2 | 0/40 |
+| V37 encerclement | 307.33 | 10.55 | 0.92 | 5 | 1/40 |
+| V38 anticipation | 290.77 | 10.45 | 1.01 | 3 | 0/40 |
+| **V39 bon rayon** | **347.06** | **12.1** | **0.84** | **5** | **1/40** |
+| V40 soin de loin | 321.08 | 11.5 | 0.89 | 4 | 0/40 |
+
+Le chiffre de 272.06 de la phase 3 vient de 20 episodes seulement, dont
+**une victoire a 1038 points** qui pese a elle seule ~39 points sur la
+moyenne : il n'est pas comparable terme a terme avec les mesures a 40
+episodes ci-dessus. C'est precisement pour cela que le protocole d'essai est
+passe a 40 episodes et que la decision se prend sur les PV perdus par salle.
+
+La meme prudence s'applique a la baseline elle-meme. Re-mesuree sur 40
+episodes, elle donne **17.13** (mediane 12.3) au lieu des 34.11 mesures sur
+20 : deux episodes campes a 135 et 109 points portaient a eux seuls la moitie
+de l'ancienne moyenne. Les rapports « x fois la baseline » de ce depot
+continuent d'utiliser **34.11**, le chiffre le plus haut, donc le plus
+defavorable a l'agent.
+
+### V41 a V44 - le clone, et un plafond qui ne bouge pas
+
+Tout est recollecte : 96 actions, 212 features (les stats de tir du joueur,
+les vitesses ennemies et l'ecart de visee ont ete ajoutes). 350 episodes du
+professeur, dont 150 avec curriculum en profondeur -> **553 763 paires**.
+
+Les 32 actions ajoutees representent **21,8 %** des decisions du professeur :
+elles ne sont pas decoratives. Le motif le plus parlant du jeu de donnees est
+`down_left_shoot_up_right` — reculer en diagonale en tirant derriere soi,
+c'est-a-dire l'esquive-tir qui etait litteralement inexprimable avant.
+
+| Version | Donnees | Reseau | Precision val. | Score (40 ep.) | PV / salle | Blocages |
+| --- | --- | --- | --- | --- | --- | --- |
+| **V41 clone** | 554 k | 384x384 | 81.7 % | **278.07** / 251.57 | 0.82 / 0.92 | **0/80** |
+| V42 + 1 DAgger | 726 k | 384x384 | 82.8 % | 254.83 | 0.87 | 2/40 |
+| V43 + 2 DAgger | 917 k | 384x384 | 83.7 % | 264.94 | 0.95 | 2/40 |
+| V44 + 2 DAgger | 917 k | 512x512 | 84.1 % | 260.59 | 0.90 | 1/40 |
+
+**La precision d'imitation monte de 81.7 a 84.1 %, et le jeu ne bouge pas.**
+Les quatre modeles tiennent dans un intervalle de 25 points alors que leurs
+erreurs types valent 18 a 22 : ils sont indiscernables. Ni les rondes DAgger
+ni le reseau plus large n'ont produit de gain mesurable, contrairement a la
+phase 2 ou la deuxieme ronde DAgger avait compte.
+
+Deux mesures rappellent au passage que 40 episodes ne suffisent toujours pas
+a departager des politiques proches : le meme modele V41, mesure deux fois
+sur 40 episodes, donne 278.07 puis 251.57. C'est la raison pour laquelle il
+est retenu sur ses **80 episodes cumules** (264.8) et sur la seule difference
+qui sorte du bruit : aucun blocage, quand tous les autres en ont.
+
+Essai complementaire : evaluation en greedy pur (`--epsilon 0`) plutot qu'avec
+2 % d'exploration. Le score ne bouge pas (263.75) mais les PV perdus par
+salle tombent a **0.76**, le meilleur chiffre de tout le projet, professeur
+compris — au prix de deux blocages en salle au tresor, exactement ce que les
+2 % d'exploration existent pour eviter. Configuration d'evaluation conservee
+a 0.02.
+
+Modele final retenu : **`models/bc_agent_v6.json`**, le clone par imitation
+seule, sur ses 80 episodes cumules (264.8, 0.87 PV par salle, aucun blocage).
+Sur le protocole historique de 20 episodes il marque **242.42**, contre
+181.42 pour le champion de la phase 3, avec 169 salles au lieu de 137 et
+aucun episode fige.
+
 ## Limites connues
 
 - Les donjons ne sont pas seedables, donc les evaluations courtes restent
   bruitees.
-- Le modele sauvegarde final utilise encore l'ancien espace de 16 actions bas
-  niveau ; le code sait le rejouer, mais la narration doit rester claire sur ce
-  point.
-- Les combats restent la principale source de runs faibles.
-- L'evaluation finale est conservee dans `reports/final_eval.csv` pour relier
+- Le score de comparaison paie le temps de survie (`time * 0.1`). Il est
+  conserve tel quel - le changer obligerait a re-mesurer tout l'historique -
+  mais il ne suffit pas a lui seul a classer deux politiques : salles et
+  etages accompagnent desormais chaque chiffre.
+- Les modeles des phases 2 et 3 ne sont plus rechargeables : l'observation
+  est passee de 109 a 202 puis 212 dimensions, et l'espace d'actions de 59 a
+  64 puis 96. Leurs resultats restent au carnet, mais la demonstration
+  rejouable est celle de la phase 4.
+- **Quarante episodes ne suffisent pas non plus** a departager deux politiques
+  proches : le meme modele mesure deux fois donne 278.07 puis 251.57. Les
+  decisions de la phase 4 s'appuient donc sur les PV perdus par salle, qui
+  comptent des centaines d'evenements au lieu de quarante.
+- Le clone plafonne a 76 %% de son professeur, et ce plafond n'a bouge ni avec
+  deux rondes DAgger ni avec un reseau 512x512.
+- L'attrition reste le mur : 0.84 PV par salle pour le professeur, quand il en
+  faudrait environ 0.2 pour terminer regulierement 46 salles avec six
+  demi-coeurs.
+- L'evaluation finale est conservee dans `reports/eval_bc_v6.csv` pour relier
   directement les chiffres finaux au fichier source.
 
 ## Pistes avec plus de temps
 
-- Evaluer chaque checkpoint sur plus d'episodes.
-- Relancer un run complet avec une autre seed.
-- Comparer l'agent final avec l'heuristique seule sur le meme protocole.
-- Tester un petit DQN sur les memes features pour generaliser entre etats
-  voisins.
+- Rendre les donjons reproductibles (remplacer `game.rng` par un generateur
+  seede a l'ouverture de la page) pour faire des comparaisons **appariees** :
+  c'est la seule facon de sortir du bruit sans multiplier les episodes.
+- Reduire encore le cout par salle : l'audit de la phase 4 montre que les
+  coups restants se prennent en majorite au corps a corps, avec un ou deux
+  ennemis, dans des salles de combat ordinaires.
+- Utiliser la competence du heros (anneau de 12 eclats toutes les 7 s), encore
+  presque inexploitee, et evaluer l'autel du sacrifice, systematiquement
+  refuse aujourd'hui.
+- Reprendre une passe RL depuis le clone de la phase 4, avec une recompense
+  qui paie la salle et l'etage plutot que la survie (voir V34).

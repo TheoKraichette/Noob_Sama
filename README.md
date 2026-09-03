@@ -126,9 +126,19 @@ Les actions disponibles dans le wrapper sont volontairement simples :
 - `interact`
 - deplacements diagonaux
 - combinaisons deplacement + tir independant, par exemple `left_shoot_right`
+- `skill` (competence du heros) et ses variantes visees
+- combinaisons **deplacement diagonal + tir**, par exemple
+  `down_left_shoot_up_right`
+
+Soit 96 actions au total. Les 32 dernieres ont ete ajoutees en phase 4 :
+`js/core/input.js` resout le deplacement et la visee sur deux axes
+independants, donc maintenir W + A + Fleche-haut est une entree legale que
+l'espace d'actions n'offrait simplement pas. Sans elles, une direction de
+fuite diagonale coutait le tir, et la politique s'immobilisait pour tirer une
+fois sur deux (voir `docs/carnet_essais.md`, V35).
 
 La baseline aleatoire conserve l'ancien espace d'actions simple pour rester
-reproductible. Les actions enrichies servent surtout au futur agent entraine et
+reproductible. Les actions enrichies servent surtout a l'agent entraine et
 a la politique heuristique.
 
 Une politique heuristique de reference est disponible :
@@ -149,8 +159,10 @@ Cas speciaux deja pris en compte par cette heuristique :
   soin uniquement quand il manque de la vie.
 - boss room : combattre comme une salle normale, puis aller au portail central
   et valider avec `E` quand le boss est vaincu.
-- salles risquees (`altar`, `defi`, `scelle`, `gambler`) : ne pas declencher
-  volontairement d'interaction optionnelle pour eviter de perdre une run de demo.
+- salle du parieur (`gambler`) : seule salle optionnelle encore refusee, payer
+  de l'or pour un tirage au sort etant de la variance sans plancher. Les
+  autres (`altar`, `defi`, `scelle`) ont ete rouvertes en phase 3 : le butin
+  pose sur un socle ne coute plus rien une fois le combat gagne.
 - abyss gate : detectee, mais non priorisee pour la premiere version car c'est
   un risque optionnel.
 
@@ -226,6 +238,12 @@ La courbe affiche la moyenne mobile des scores d'entrainement, les evaluations
 periodiques, le meilleur score d'evaluation conserve et la baseline aleatoire.
 Elle sert de support visuel pour comparer l'agent aleatoire et l'agent entraine
 pendant la restitution.
+
+Elle trace une progression **par episode**, ce qui n'a de sens que pour les
+methodes qui apprennent en jouant : le Q-learning de la phase 1 et la passe RL
+de la phase 3. Le clonage des phases 3 et 4 apprend par epoques sur un jeu de
+donnees fixe, et sa progression se lit dans les tableaux de resultats, pas sur
+cette courbe.
 
 ## Methode d'apprentissage
 
@@ -390,18 +408,325 @@ python scripts/dashboard.py
 # puis ouvrir http://127.0.0.1:8765
 ```
 
-## Demo de l'agent entraine
+## Phase 3 - viser la run complete
 
-Chaque agent se recharge depuis un script neuf, sans relancer
-l'entrainement, et joue dans un navigateur visible :
+### Pourquoi le budget change
+
+La phase 2 comparait sur 900 steps. La lecture du code du jeu donne la taille
+reelle d'une partie : `FINAL_FLOOR = 5`, des etages de 8/9/10/11/8 salles,
+soit 46 salles et 5 gardiens, et 15 a 19 minutes de jeu annoncees par les
+auteurs. A 0.13 s de jeu par step, une run complete coute environ **9 000
+steps** : sur 900, la victoire etait impossible par construction, pas par
+faiblesse de l'agent.
+
+Le protocole passe donc a **20 episodes x 9 000 steps**, avec la baseline
+aleatoire re-mesuree sur ce budget :
 
 ```bash
-# Agent phase 2 (reseau clone, recommande pour la demo)
-python scripts/watch_dqn.py --agent models/bc_agent.json --episodes 3
+python scripts/baseline_random.py --episodes 20 --max-steps 9000 --seed 42 --turbo
+```
+
+- Score moyen : **34.114** (min 2.129, max 134.951, ecart-type 32.827).
+- 19 episodes sur 20 se terminent par une mort.
+- Donnees : `reports/random_baseline_9000.csv`.
+
+Les chiffres des budgets 100 et 900 steps restent au carnet d'essais comme
+historique, mais ne sont plus le referentiel de comparaison.
+
+### Ce qui est autorise, ce qui ne l'est pas
+
+L'agent ne gagne aucun avantage que le jeu ne donne pas a un joueur.
+
+**Autorise** : lire l'etat interne du jeu (choix documente depuis la phase 1,
+pour eviter l'apprentissage depuis pixels) ; n'agir que par evenements
+clavier ; avancer la simulation a pas fixe (mode turbo) ; calculer sans
+limite de temps entre deux pas ; et demarrer un episode **d'entrainement** a
+un etage arbitraire.
+
+**Interdit** : modifier les regles ou la difficulte du jeu, octroyer vie, or
+ou objets en evaluation, desactiver des ennemis, et conserver la moindre
+meta-progression d'un episode a l'autre.
+
+Deux garde-fous rendent ces regles verifiables plutot que declaratives :
+
+- La sauvegarde du jeu (`localStorage` : heros debloques, eclats du
+  Sanctuaire) est **videe a chaque chargement de page**. Sans cela elle
+  s'accumulait entre les episodes d'une meme session, et les derniers
+  tournaient sur un personnage plus fort que les premiers - et que la
+  baseline. Consequence assumee : seul Solen, le heros de depart, est
+  jouable.
+- L'evaluation refuse de demarrer ailleurs qu'a l'etage 1 avec un inventaire
+  vide (assertion dans `scripts/watch_dqn.py`). Le curriculum par etage
+  n'existe donc que pour la collecte de donnees.
+
+### L'audit des morts
+
+Toutes les decisions de la phase 3 viennent d'un meme outil :
+
+```bash
+python scripts/audit_deaths.py --policy heuristic --episodes 20 --max-steps 9000
+```
+
+Il produit une ligne par point de vie perdu, avec le coupable nomme par le jeu
+lui-meme (`killerName`), l'etage, le type de salle et l'attaque de gardien en
+cours ; plus deux metriques qui manquaient : les **degats subis par salle
+nettoyee** (progresser plus loin fait mecaniquement encaisser plus, seul le
+taux dit si la politique s'ameliore) et les **blocages**, ces episodes qui
+epuisent leur budget sans mourir et qu'aucune table de morts ne montre.
+
+Trois trouvailles majeures en sont sorties, detaillees au carnet d'essais :
+
+1. L'agent ne voyait qu'un tiers du danger (observations tronquees a 6
+   projectiles et 6 zones, quand `aftershock` en pose 19 d'un coup).
+2. Les salles de combat profondes contiennent des **piliers** qui arretent
+   les tirs. Rien ne les exposait : l'agent tirait dedans, jusqu'a 7 380 steps
+   d'affilee - 82 %% d'un budget d'episode.
+3. La politique combattait les elites des salles scellees puis **repartait
+   sans la relique**, parce qu'une regle de prudence confondait « declencher
+   une epreuve » et « ramasser un butin deja pose ».
+
+### L'agent appris
+
+Le pipeline part du professeur et n'en garde que ce qu'un reseau peut
+reproduire :
+
+1. **Collecte** : 180 episodes du professeur, dont un tiers demarres en
+   profondeur par le curriculum -> 243 751 paires (features -> action),
+   stockees en float16, avec sous-echantillonnage des couloirs calmes pour
+   rendre le jeu de donnees majoritairement combattant.
+2. **Clonage** : reseau 384x384 en numpy, entropie croisee.
+3. **DAgger, deux rondes** : le clone joue, l'heuristique etiquette chacun de
+   ses etats. C'est ce qui lui apprend a se rattraper dans ses propres
+   derives - le defaut central du clonage pur.
+4. **Auto-imitation iteree** et **affinage RL (DQfD)** : tentes, mesures,
+   non retenus (voir le carnet).
+
+Total : **581 438 paires**, precision de validation 83.7 %.
+
+### Resultats
+
+Protocole : 20 episodes x 9 000 steps, meme score, meme budget. Les colonnes
+salles et etages sont des totaux sur les 20 episodes - elles accompagnent le
+score parce qu'elles, au moins, ne se gagnent pas en restant immobile.
+
+| Agent | Score moyen | vs aleatoire | Salles | Etages | Etage max | Victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Aleatoire | 34.11 | 1x | 0 | 0 | 1 | 0/20 |
+| Clone (imitation seule) | 186.95 | 5.5x | 117 | 9 | 2 | 0/20 |
+| Clone + 1 ronde DAgger | 159.02 | 4.7x | 127 | 8 | 2 | 0/20 |
+| Auto-imitation iteree | 158.36 | 4.6x | 131 | 8 | 2 | 0/20 |
+| Affinage RL (DQfD) | 198.04 | 5.8x | 97 | 5 | 2 | 0/20 |
+| **Clone + 2 rondes DAgger (retenu)** | **181.42** | **5.3x** | **137** | **10** | **3** | 0/20 |
+| Heuristique (professeur) | 272.06 | 8.0x | 194 | 19 | **5** | **1/20** |
+
+Le modele retenu n'est pas celui qui marque le plus. Deux lignes marquent plus
+que lui et jouent moins bien :
+
+- le clone sans DAgger doit ses 186.95 a **cinq episodes figes** sur 9 000
+  steps, ou le terme `time * 0.1` du score paie environ 135 points de pure
+  survie - davantage qu'une run honnete qui nettoie cinq salles et meurt ;
+- l'agent RL, lui, a appris a survivre sans jouer : 13 episodes sur 20
+  epuisent leur budget, pour 97 salles nettoyees contre 137.
+
+Le score n'a pas ete modifie - c'est le referentiel de comparaison avec la
+baseline. Mais il ne suffit pas seul a departager deux politiques, et le
+carnet d'essais detaille les trois fois ou cette pathologie est apparue.
+
+**Le professeur reste devant le clone** (272.06 contre 181.42), contrairement
+a la phase 2 ou le clone l'avait rattrape. Deux raisons mesurables : l'espace
+d'actions est passe de 59 a 64 et l'etat de 109 a 202 dimensions ; et le
+professeur tire desormais une part de sa force de decisions **rares** -
+prendre l'autel, classer trois reliques, garder l'or pour un coeur - qui
+n'apparaissent que quelques dizaines de fois dans 580 000 paires.
+
+La run victorieuse du professeur a traverse les 5 etages, nettoye 32 salles,
+vaincu 227 ennemis et accumule 13 reliques. Les runs qui meurent a l'etage 1
+en ont une seule : le build n'est pas un confort, c'est la variable qui
+decide.
+
+### Reproduction
+
+```bash
+# Baseline du protocole
+python scripts/baseline_random.py --episodes 20 --max-steps 9000 --seed 42 --turbo
+
+# Ou meurt la politique, et de quoi
+python scripts/audit_deaths.py --policy heuristic --episodes 20 --max-steps 9000
+
+# Collecte (curriculum : 60 %% de runs completes, le reste en profondeur)
+python scripts/collect_demos.py --episodes 180 --max-steps 9000 --workers 6 \
+    --floors 1 1 1 1 1 1 2 3 4 5 --seed 42 --output data/demos.npz
+python scripts/train_bc.py --demos data/demos.npz --hidden 384 384 --epochs 40 \
+    --batch-size 512 --output models/bc_agent_v3.json
+
+# Ronde DAgger : le clone joue, l'heuristique etiquette
+python scripts/collect_demos.py --policy models/bc_agent_v3.json --episodes 120 \
+    --max-steps 9000 --workers 6 --floors 1 1 1 1 2 3 --seed 7 --output data/dagger1.npz
+# ... puis une deuxieme ronde, et l'entrainement final :
+python scripts/train_bc.py --demos data/demos.npz data/dagger1.npz data/dagger2.npz \
+    --hidden 384 384 --epochs 40 --batch-size 512 --output models/bc_agent_v5.json
+
+# Evaluation au protocole
+python scripts/watch_dqn.py --agent models/bc_agent_v5.json --episodes 20 \
+    --max-steps 9000 --headless --turbo --output reports/eval_bc_v5.csv
+```
+
+## Phase 4 - la ou la run perdait vraiment ses coeurs
+
+La phase 3 avait cherche la profondeur ; la phase 4 est partie d'un chiffre
+tres simple. Le joueur a **6 demi-coeurs** (`PLAYER_CFG.maxHp`), la politique
+en perdait **1.0 par salle**, et une run complete fait 46 salles. Rien
+d'autre ne compte tant que ce rapport n'a pas baisse.
+
+L'audit des morts a designe une cause qui n'etait ni la perception ni
+l'esquive : **171 des 261 coups recus l'etaient sans un seul projectile a
+l'ecran**, et 92 avec un seul ennemi present. La politique se faisait toucher
+au corps a corps par des ennemis deux fois plus lents qu'elle.
+
+### Deux trous structurels
+
+**1. L'espace d'actions etait incomplet.** `js/core/input.js` resout le
+deplacement (`getMove`) et la visee (`getShoot`) sur deux axes independants :
+maintenir W + A + Fleche-haut est une entree parfaitement legale. Or aucune
+action « deplacement diagonal + tir » n'existait. Verifie dans le navigateur
+avant d'y toucher : `vx=-205 vy=-205` (norme 290) avec `aim=[1,0]`.
+
+Mesure sur 5 341 pas de combat reels : la politique ne tirait que pendant
+**68,3 %** d'entre eux. Des que la fuite etait diagonale — une fois sur deux
+— elle lachait le tir et s'immobilisait. 32 actions ajoutees, 96 en tout, et
+le temps de tir passe a **92,6 %**. Ces actions representent aujourd'hui
+21,8 % des decisions du professeur.
+
+**2. La visee clavier n'a que huit rayons.** Une cible a un demi-secteur du
+rayon est manquee de `r x sin(22.5 deg)`, soit 115 px a 300 px de distance,
+contre un corps et un orbe qui font ensemble 20 px. Sur 4 948 tirs reels,
+**seuls 25,6 % pouvaient geometriquement atteindre leur cible**.
+
+La reponse n'est pas de mieux tirer, c'est de mieux se placer : quand la
+cible n'est pas sur un rayon, **tourner autour d'elle** jusqu'a ce qu'elle y
+soit, sans cesser de tirer. Plus le choix du rayon reellement le plus proche
+du relevement, la regle precedente basculant en diagonale des que les deux
+ecarts depassaient 45 px. Tirs pouvant toucher : **25,6 % -> 40,8 %**, ecart
+lateral median 52 -> 31 px.
+
+### Le protocole de mesure aussi a change
+
+Vingt episodes laissent une erreur type d'environ 25 points sur la moyenne,
+qui masque tout ce qui est plus petit qu'elle. `audit_deaths.py` accepte
+desormais `--workers`, les essais se font sur **40 episodes**, et la
+metrique de decision est les **PV perdus par salle** : elle compte des
+centaines d'evenements au lieu de quarante, donc son erreur est bien plus
+serree que celle du score.
+
+Cette prudence vaut aussi contre nous. Re-mesuree sur 40 episodes, la
+baseline aleatoire donne **17.13** au lieu des 34.11 mesures sur 20 : deux
+episodes campes a 135 et 109 points portaient la moitie de l'ancienne
+moyenne. Les rapports « x fois la baseline » ci-dessous continuent d'utiliser
+**34.11**, le chiffre le plus haut, donc le plus defavorable a l'agent.
+
+### Resultats
+
+Protocole : **40 episodes x 9 000 steps**. Salles et etages sont des totaux
+sur les 40 episodes.
+
+| Agent | Score moyen | Salles | Etages | Etage max | PV / salle | Victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Aleatoire | 17.13 +/- 3.3 | 2 | 0 | 1 | - | 0/40 |
+| Clone + 2 rondes DAgger | 264.94 +/- 18.2 | 383 | 37 | 3 | 0.95 | 0/40 |
+| Clone 512x512 | 260.59 +/- 17.7 | 362 | 41 | 3 | 0.90 | 0/40 |
+| **Clone phase 4 (retenu, 80 ep.)** | **264.8 +/- 14.8** | **759** | **79** | **4** | **0.87** | 0/80 |
+| Professeur phase 4 | **347.06 +/- 36.9** | 485 | 52 | **5** | **0.84** | **1/40** |
+
+Le rapport a la baseline depend de laquelle on prend, et les deux sont
+donnees : **15.5x** contre la baseline re-mesuree sur 40 episodes (17.13),
+**7.8x** contre celle de la phase 3 (34.11, mesuree sur 20 episodes dont deux
+campes). Le professeur est a 20.3x et 10.2x respectivement. La colonne
+« PV / salle » ne s'applique pas a l'aleatoire, qui ne termine presque aucune
+salle : 2 en 40 episodes.
+
+Sur le protocole historique de 20 episodes, le modele retenu, recharge depuis
+un script neuf, marque **242.42 +/- 20.3** pour 169 salles et 18 etages
+franchis, contre 181.42 / 137 salles / 10 etages pour le champion de la
+phase 3 : **+34 % de score, +23 % de salles, +80 % d'etages**, et surtout
+**aucun episode fige** sur les 20 (contre 2 auparavant), donc pas un point
+gagne en restant immobile.
+
+### Ce qui n'a pas marche
+
+Quatre essais mesures et non retenus, detailles au carnet :
+
+- **Anticiper le mouvement de la cible** (viser le point d'impact plutot que
+  la position courante). La visee s'ameliore, le jeu se degrade : les
+  poursuivants accelerent a 850 px/s2 et oscillent, leur vitesse instantanee
+  predit mal une demi-seconde, et comme le point vise pilote aussi le
+  deplacement, une prediction bruitee fait tourner la politique dans le vide.
+- **Aller chercher le soin de plus loin** en combat. Traverser une salle pour
+  un demi-coeur coute plus de vie qu'il n'en rend.
+- **Les rondes DAgger**, et **un reseau plus large**. La precision
+  d'imitation monte de 81.7 a 84.1 %, le jeu ne bouge pas : les quatre
+  clones tiennent dans 25 points pour des erreurs types de 18 a 22. C'est le
+  resultat le plus net de cette phase cote apprentissage — l'imitation sature
+  bien avant son professeur, et ce n'est pas la capacite qui manque.
+
+### Ce qui reste
+
+Le clone plafonne a 76 % du professeur. Le professeur, lui, franchit les
+cinq etages et gagne une run sur quarante, mais perd encore 0.84 PV par
+salle quand il en faudrait environ 0.2 pour terminer regulierement les 46
+salles avec six demi-coeurs et un soin rare. L'ecart n'est plus un probleme
+de perception : c'est le cout de chaque salle qui doit encore etre divise
+par quatre.
+
+### Reproduction
+
+```bash
+# Baseline du protocole (40 episodes)
+python scripts/baseline_random.py --episodes 40 --max-steps 9000 --seed 42 --turbo \
+    --output reports/random_baseline_9000_40.csv
+
+# Le professeur, et ou il perd ses coeurs
+python scripts/audit_deaths.py --policy heuristic --episodes 40 --workers 4 \
+    --output reports/death_audit_v39_ray.csv
+
+# Collecte : 150 episodes avec curriculum, puis 200 depuis l'etage 1
+python scripts/collect_demos.py --episodes 150 --workers 6 --floors 1 1 1 1 2 3 4 5 \
+    --output data/demos_v4.npz
+python scripts/collect_demos.py --episodes 200 --workers 6 --floors 1 --seed 777 \
+    --output data/demos_v4b.npz
+
+# Clonage
+python scripts/train_bc.py --demos data/demos_v4.npz data/demos_v4b.npz \
+    --hidden 384 384 --epochs 30 --output models/bc_agent_v6.json
+
+# Evaluation : 40 episodes pour decider, 20 pour le protocole historique
+python scripts/audit_deaths.py --policy models/bc_agent_v6.json --episodes 40 \
+    --workers 3 --output reports/death_audit_clone_v6.csv
+python scripts/watch_dqn.py --agent models/bc_agent_v6.json --episodes 20 \
+    --max-steps 9000 --headless --turbo --output reports/eval_bc_v6.csv
+```
+
+## Demo de l'agent entraine
+
+L'agent se recharge depuis un script neuf, sans relancer l'entrainement, et
+joue dans un navigateur visible :
+
+```bash
+# Agent phase 4 (clone retenu, recommande pour la demo)
+python scripts/watch_dqn.py --episodes 3 --max-steps 9000
 
 # Agent phase 1 (Q-learning tabulaire)
 python scripts/watch_agent.py --episodes 3
 ```
+
+Les poids ne sont pas versionnes (la consigne interdit de commiter des
+donnees ou des modeles) : `models/bc_agent_v6.json` se regenere avec les
+commandes de reproduction de la phase 4, en environ deux heures dont
+l'essentiel en collecte.
+
+Note : les modeles des phases 2 et 3 ne sont plus rechargeables. L'observation
+est passee de 109 a 202 puis 212 dimensions, et l'espace d'actions de 59 a 64
+puis 96 ; leurs resultats restent au carnet d'essais, mais la demonstration
+rejouable est celle de la phase 4.
 
 ## Video de restitution
 
@@ -410,14 +735,26 @@ Lien video public : a ajouter apres upload.
 Plan conseille pour la video de 10 a 15 minutes :
 
 1. Presenter le jeu choisi et pourquoi il respecte les contraintes du projet.
-2. Montrer la baseline aleatoire et son score moyen de 1.836.
-3. Expliquer les observations, les actions et la fonction de recompense.
-4. Expliquer le choix du Q-learning tabulaire et les garde-fous heuristiques.
-5. Montrer la courbe `reports/progression_curve.svg` et comparer random vs
-   agent entraine.
-6. Montrer une demo avec `python scripts/watch_agent.py --episodes 3`.
-7. Presenter un echec instructif depuis `docs/carnet_essais.md`.
-8. Conclure sur les limites et ce qui serait fait avec plus de temps.
+2. Montrer la baseline aleatoire sur le protocole de la run complete et
+   expliquer pourquoi le budget a change : une partie entiere coute environ
+   9 000 steps. Dire aussi que la baseline elle-meme a du etre re-mesuree
+   (34.11 sur 20 episodes, 17.13 sur 40) et pourquoi.
+3. Expliquer les observations, les actions et la fonction de recompense, puis
+   le contrat d'honnetete (sauvegarde vierge, evaluation depuis l'etage 1).
+4. Expliquer le pipeline : professeur heuristique -> clonage -> DAgger, et
+   pourquoi l'audit des morts pilote chaque decision.
+5. Le coeur de la demonstration : les deux mesures de la phase 4. Le tir n'a
+   lieu que 68 %% du temps parce que l'espace d'actions etait incomplet, et
+   seuls 26 %% des tirs peuvent geometriquement toucher parce que la visee
+   clavier n'a que huit rayons. Montrer le calcul `r x sin(22.5 deg)`.
+6. Montrer la courbe `reports/progression_curve.svg` et le tableau
+   comparatif.
+7. Montrer une demo avec `python scripts/watch_dqn.py --episodes 3 --max-steps 9000`.
+8. Presenter trois echecs instructifs du carnet : V29 (un defaut evident qui
+   n'en etait pas un, -33 %% de score), V34 (la passe RL qui ameliore le score
+   en nettoyant 30 %% de salles en moins) et V42-V44 (la precision d'imitation
+   monte de 81.7 a 84.1 %% sans que le jeu bouge).
+9. Conclure sur les limites et ce qui serait fait avec plus de temps.
 
 ## Essais et difficultes (pour le carnet d'essais)
 
