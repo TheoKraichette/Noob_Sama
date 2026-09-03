@@ -16,7 +16,7 @@ from src.features import featurize
 from src.policies import heuristic_action
 
 
-DEFAULT_AGENT = ROOT / "models" / "bc_agent.json"
+DEFAULT_AGENT = ROOT / "models" / "bc_agent_v6.json"
 
 
 def parse_args() -> argparse.Namespace:
@@ -65,6 +65,7 @@ def main() -> None:
     )
     scores: list[float] = []
     rows: list[dict[str, object]] = []
+    wins = 0
 
     with EclipseEnv(
         headless=args.headless,
@@ -74,6 +75,13 @@ def main() -> None:
     ) as env:
         for episode in range(1, args.episodes + 1):
             obs = env.reset()
+            # Evaluation is always a full honest run: no floor curriculum, no
+            # carried-over save. The floor jump exists for training only.
+            if obs.floor != 1 or obs.item_count or obs.gold:
+                raise RuntimeError(
+                    f"evaluation must start on floor 1 with an empty build, "
+                    f"got floor={obs.floor} items={obs.item_count} gold={obs.gold}"
+                )
             previous = None
             done = False
             steps = 0
@@ -103,12 +111,16 @@ def main() -> None:
 
             score = env.get_score()
             scores.append(score)
+            won = obs.state == "victory"
+            wins += int(won)
             rows.append(
                 {
                     "episode": episode,
                     "steps": steps,
                     "done": done,
+                    "won": won,
                     "score": round(score, 6),
+                    "floor": obs.floor,
                     "floors": obs.floors,
                     "rooms": obs.rooms,
                     "kills": obs.kills,
@@ -116,9 +128,9 @@ def main() -> None:
                 }
             )
             print(
-                f"episode={episode} steps={steps} done={done} "
-                f"score={score:.3f} floors={obs.floors} rooms={obs.rooms} "
-                f"kills={obs.kills} time={obs.time:.2f}"
+                f"episode={episode} steps={steps} done={done} won={won} "
+                f"score={score:.3f} floor={obs.floor} floors={obs.floors} "
+                f"rooms={obs.rooms} kills={obs.kills} time={obs.time:.2f}"
             )
 
     if args.output and rows:
@@ -130,7 +142,7 @@ def main() -> None:
 
     if scores:
         print(
-            f"summary episodes={len(scores)} "
+            f"summary episodes={len(scores)} wins={wins} "
             f"avg={statistics.mean(scores):.3f} "
             f"min={min(scores):.3f} max={max(scores):.3f}"
         )

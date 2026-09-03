@@ -81,7 +81,8 @@ def main() -> None:
         correct = 0
         for start in range(0, len(idx), 4096):
             batch = idx[start : start + 4096]
-            logits = agent._forward(states[batch], agent.params)[-1]
+            inputs = states[batch].astype(np.float32)
+            logits = agent._forward(inputs, agent.params)[-1]
             correct += int((logits.argmax(axis=1) == actions[batch]).sum())
         return correct / len(idx)
 
@@ -91,7 +92,10 @@ def main() -> None:
         losses = []
         for start in range(0, len(train_idx), args.batch_size):
             batch = train_idx[start : start + args.batch_size]
-            losses.append(agent.train_step_bc(states[batch], actions[batch]))
+            # Demos are stored as float16 to fit a full-run dataset in
+            # memory; the network itself works in float32.
+            inputs = states[batch].astype(np.float32)
+            losses.append(agent.train_step_bc(inputs, actions[batch]))
         val_acc = accuracy(val_idx)
         print(
             f"epoch={epoch:02d} loss={np.mean(losses):.4f} val_acc={val_acc:.3f}",
