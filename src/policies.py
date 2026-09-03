@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 
+from src import aiming, bestiary, economy, mover
 from src.eos_env import Observation
 from src.features import AIM_SECTOR, SHOT_RADIUS, aim_miss, item_value
 
@@ -35,6 +36,18 @@ COMBAT_PICKUP_RANGE = 140.0
 ROOM_WIDTH = 1280.0
 ROOM_HEIGHT = 720.0
 WALL_MARGIN = 120.0
+# Below this distance a target is walked at directly, with a tight dead
+# zone (see _move_towards).
+CLOSE_APPROACH = 80.0
+
+# The build rules: False = the phase 4 valuation (five modifiers, altar
+# only, shop by value), True = economy.py (every modifier, brazier,
+# gambler, gold reserve).
+BUILD_V2 = False
+
+
+def _value(obs: Observation, entry: dict) -> float:
+    return economy.item_value(obs, entry) if BUILD_V2 else item_value(obs, entry)
 
 # Dodging thresholds. Enemy shots are slow orbs meant to be dodged by
 # movement; hazards are telegraphed blast circles that resolve when their
@@ -122,7 +135,7 @@ def heuristic_action(obs: Observation) -> str:
         if pickup["type"] == "item" and pickup.get("choice") and pickup["distance"] <= 55:
             return "interact"
         if pickup["distance"] > 20:
-            return _travel(obs, pickup)
+            return _collect(obs, pickup)
 
     if obs.portal_active and obs.portal:
         if obs.portal["distance"] <= 65:
@@ -338,7 +351,7 @@ def _best_choice_item(obs: Observation) -> dict | None:
         return None
     return max(
         choices,
-        key=lambda p: (item_value(obs, p), -p.get("distance", 9999)),
+        key=lambda p: (_value(obs, p), -p.get("distance", 9999)),
     )
 
 
@@ -346,13 +359,25 @@ def _altar_action(obs: Observation) -> str | None:
     """Seal the pact at the sacrifice altar: 1 heart of max life for a
     guaranteed epic relic. Refused while the run is already fragile."""
     focus = obs.room_focus
-    if not focus or focus.get("kind") != "altar":
+    if not focus:
         return None
-    if obs.max_hp <= ALTAR_MIN_MAX_HP or obs.enemy_count:
-        return None
-    # Pay from a healthy bar, never from the last hearts of a wounded run.
-    if obs.hp < obs.max_hp - 1:
-        return None
+    kind = focus.get("kind")
+    if BUILD_V2:
+        wanted = (
+            kind == "altar" and economy.wants_altar(obs)
+            or kind == "gambler" and economy.wants_gamble(obs)
+            or kind == "defi" and economy.wants_challenge(obs)
+        )
+        if not wanted:
+            return None
+    else:
+        if kind != "altar":
+            return None
+        if obs.max_hp <= ALTAR_MIN_MAX_HP or obs.enemy_count:
+            return None
+        # Pay from a healthy bar, never from the last hearts of a wounded run.
+        if obs.hp < obs.max_hp - 1:
+            return None
     if focus["distance"] <= 88:
         return "interact"
     return _travel(obs, focus)
@@ -421,10 +446,17 @@ def _best_shop_item(obs: Observation) -> dict | None:
         return None  # save the purse for the heart on the same shelf
 
     relics = [i for i in affordable if i.get("kind") == "item"]
+    if BUILD_V2:
+        # keep a heart's price back when hurt, and only buy what helps
+        relics = [
+            i for i in relics
+            if obs.gold - i.get("price", 0) >= economy.shop_reserve(obs)
+            and economy.item_value(obs, i) >= 0.6
+        ]
     if relics:
         return max(
             relics,
-            key=lambda i: (item_value(obs, i), -i.get("distance", 9999)),
+            key=lambda i: (_value(obs, i), -i.get("distance", 9999)),
         )
     return None
 
@@ -437,7 +469,15 @@ def _heart_on_sale(obs: Observation) -> bool:
 
 
 def _move_towards(obs: Observation, target: dict) -> str:
-    return _move_from_delta(target["x"] - obs.x, target["y"] - obs.y)
+    dx = target["x"] - obs.x
+    dy = target["y"] - obs.y
+    # Close to the objective, the 24 px dead zone made the hero orbit it:
+    # a coin at 36 px is inside the zone on one axis, outside on the other,
+    # and four steps of 43 px draw a square around it that the coin's
+    # magnet (about 220 px/s) never closes. Two runs out of eighty burned
+    # their whole budget that way.
+    close = math.hypot(dx, dy) < CLOSE_APPROACH
+    return _move_from_delta(dx, dy, deadzone=6 if close else 24)
 
 
 def _travel(obs: Observation, target: dict) -> str:
@@ -463,6 +503,19 @@ def _door_approach(obs: Observation, door: dict) -> str:
         if direction in {"up", "down"} and abs(door["x"] - obs.x) > DOOR_ALIGN_TOLERANCE:
             return _move_from_delta((door["x"] - obs.x) * 10, 0)
     return _travel(obs, door)
+
+
+# Coins are drawn to the player from this far (pickup.js: 110 px, at up to
+# ~220 px/s). A hero running at 290 px/s toward a coin overruns it and the
+# coin trails behind, never inside the 28 px pickup radius: five runs out of
+# eighty spent their whole budget circling one. Standing still collects it.
+GOLD_MAGNET = 100.0
+
+
+def _collect(obs: Observation, pickup: dict) -> str:
+    if pickup.get("type") == "gold" and pickup.get("distance", 9999) < GOLD_MAGNET:
+        return "noop"
+    return _travel(obs, pickup)
 
 
 def _move_away(obs: Observation, target: dict) -> str:
@@ -916,10 +969,315 @@ def _combine(move: str, shoot: str) -> str:
     return f"{move}_{shoot}"
 
 
-def _move_from_delta(dx: float, dy: float) -> str:
-    deadzone = 24
+def _move_from_delta(dx: float, dy: float, deadzone: float = 24) -> str:
     horizontal = "right" if dx > deadzone else "left" if dx < -deadzone else ""
     vertical = "down" if dy > deadzone else "up" if dy < -deadzone else ""
     if vertical and horizontal:
         return f"{vertical}_{horizontal}"
     return vertical or horizontal or "noop"
+
+
+# ---------------------------------------------------------------------------
+# Decisions with a continuous aim
+# ---------------------------------------------------------------------------
+
+# The keyboard shoots along eight rays, so a hit was only possible when the
+# target happened to sit near one of them (41 % of the shots, measured), and
+# the rules above walk around the target to line it up. The mouse aims at
+# any angle. `heuristic_decision` keeps every rule of `heuristic_action`
+# unchanged and only replaces the shot: the same target, aimed exactly.
+
+
+_last_target: dict | None = None
+
+
+def heuristic_decision(
+    obs: Observation,
+    *,
+    lead: bool = False,
+    priority: bool = False,
+    always_fire: bool = False,
+    predictive: bool = False,
+    build: bool = False,
+    bosses: bool = False,
+) -> tuple[str, tuple[float, float] | None]:
+    """The rule-based policy as (movement action, aim vector or None).
+
+    `lead` meets a moving target where the orb will find it; `priority`
+    picks the target by what it costs to leave alive instead of by distance;
+    `always_fire` keeps shooting during the moves the keyboard rules left
+    silent (dashes, pure repositioning), which the arrows could not combine.
+    """
+    global _last_target, BUILD_V2
+    BUILD_V2 = build
+    if predictive:
+        return _decision_v2(obs, lead=lead, priority=priority, bosses=bosses)
+    action = heuristic_action(obs)
+    move, shoots = split_shot(action)
+    if not shoots:
+        if not (always_fire and obs.enemies and move not in ("skill", "interact")):
+            return move, None
+    if priority:
+        target = aiming.pick_target(obs, _last_target)
+        _last_target = target
+    else:
+        target = obs.nearest_enemy
+    if target is None:
+        return move, None
+    if lead:
+        return move, aiming.aim_vector(obs, target, lead=True)
+    return move, aim_at(obs, target)
+
+
+def split_shot(action: str) -> tuple[str, bool]:
+    """Strip the arrow part of an action name: ('up_shoot_left') -> ('up', True)."""
+    if action.startswith("shoot_"):
+        return "noop", True
+    if "_shoot_" in action:
+        return action.split("_shoot_", 1)[0], True
+    return action, False
+
+
+def aim_at(obs: Observation, target: dict) -> tuple[float, float]:
+    """Unit vector from the player to the target's current position."""
+    dx = target["x"] - obs.x
+    dy = target["y"] - obs.y
+    norm = math.hypot(dx, dy)
+    if norm < 1e-6:
+        return (1.0, 0.0)
+    return (dx / norm, dy / norm)
+
+
+# ---------------------------------------------------------------------------
+# The predictive teacher
+# ---------------------------------------------------------------------------
+
+# Distance the fight is comfortable at, by family (see bestiary.py and the
+# game's enemy.js): far enough that a charger's dash falls short and a
+# bomber never arms, close enough to stay inside the orb's 470 px range.
+STANDOFF = {
+    "chase": (150.0, 320.0),
+    "charge": (240.0, 350.0),
+    "kite": (300.0, 440.0),
+    "bomb": (170.0, 400.0),
+    "summon": (250.0, 330.0),
+    "shield": (150.0, 300.0),
+    "flee": (0.0, 900.0),
+    "boss": (200.0, 420.0),
+}
+
+_last_dir: tuple[float, float] | None = None
+
+
+def _decision_v2(
+    obs: Observation, *, lead: bool = True, priority: bool = True, bosses: bool = False
+) -> tuple[str, tuple[float, float] | None]:
+    """Same targets and economy as the keyboard rules, movement by simulation.
+
+    Every step in a fight goes through mover.choose: the rules only say
+    what they would like (keep the family's distance band, follow the boss
+    response, walk to a heart), and the simulation refuses whatever gets
+    hit in the next 0.6 s. The shot is aimed at the chosen target on every
+    step, dashes included, which the arrow keys could never do.
+    """
+    global _last_target, _last_dir
+    if obs.state != "play":
+        return "noop", None
+
+    unstick = _unstick(obs)
+    if unstick:
+        return unstick, None
+
+    target = aiming.pick_target(obs, _last_target) if priority else obs.nearest_enemy
+    _last_target = target
+    aim = aiming.aim_vector(obs, target, lead=lead) if target else None
+
+    # Out of combat, the keyboard rules already know what to do (loot,
+    # altar, shop, doors, portal); only the way there is checked against
+    # the arena's or the biome's zones.
+    if not obs.enemies:
+        action = heuristic_action(obs)
+        move, _ = split_shot(action)
+        if move in ("interact", "skill") or move.startswith("skill"):
+            return move, None
+        if not obs.hazards and not obs.shots and not obs.spawning:
+            return move, None
+        prefer = _direction_of(move)
+        picked = mover.choose(obs, mover.Goal(prefer=prefer, hold=prefer is None, previous=_last_dir))
+        _last_dir = picked.direction if picked.action != "noop" else _last_dir
+        return picked.action, None
+
+    skill = _skill_action(obs)
+    if skill:
+        return "skill", aim
+
+    goal = mover.Goal(previous=_last_dir, target=target, avoid_future=bosses)
+    heart = _best_pickup(obs)
+    if heart is not None:
+        goal.prefer = _unit(heart["x"] - obs.x, heart["y"] - obs.y)
+        goal.band = (0.0, 900.0)
+    elif target is not None:
+        row = bestiary.info(target)
+        lo, hi = STANDOFF.get(row["behaviour"], (150.0, 320.0))
+        if row["behaviour"] == "bomb":
+            lo = row.get("trigger_dist", 125) + 40.0
+        if target.get("elite"):
+            lo, hi = lo + 40.0, hi + 40.0
+        if obs.floor >= 3:
+            lo, hi = lo * 1.15, hi * 1.15
+        goal.band = (lo, hi)
+        dx, dy = target["x"] - obs.x, target["y"] - obs.y
+        distance = math.hypot(dx, dy) or 1.0
+        ux, uy = dx / distance, dy / distance
+        response = _boss_attack_response(obs, target, "shoot_up") if target.get("boss") else None
+        table = _boss_prefer_v2(obs, target) if bosses and target.get("boss") else None
+        if table is not None:
+            goal.prefer, goal.hold = table
+        elif response and response != "noop":
+            move, _ = split_shot(response)
+            goal.prefer = _direction_of(move.replace("dash_", ""))
+            goal.hold = goal.prefer is None
+        elif distance < lo:
+            goal.prefer = (-ux, -uy)
+        elif distance > hi:
+            goal.prefer = (ux, uy)
+        else:
+            # inside the band: keep circling, on the side already taken
+            side = 1.0
+            if _last_dir is not None and (-uy * _last_dir[0] + ux * _last_dir[1]) < 0:
+                side = -1.0
+            goal.prefer = (-uy * side, ux * side)
+            goal.weight_band = 0.5
+    picked = mover.choose(obs, goal)
+    if picked.action != "noop":
+        _last_dir = picked.direction
+    return picked.action, aim
+
+
+def last_target() -> dict | None:
+    """The enemy the last decision aimed at (for recording demonstrations)."""
+    return _last_target
+
+
+def _direction_of(move: str) -> tuple[float, float] | None:
+    name = move[5:] if move.startswith("dash_") else move
+    return mover.DIRECTIONS.get(name)
+
+
+def _unit(dx: float, dy: float) -> tuple[float, float]:
+    d = math.hypot(dx, dy)
+    return (dx / d, dy / d) if d > 1e-6 else (1.0, 0.0)
+
+
+# ---------------------------------------------------------------------------
+# The inventory reflex
+# ---------------------------------------------------------------------------
+
+def economy_action(obs: Observation) -> str | None:
+    """The room's economic decision, when there is one and the room is quiet.
+
+    Pedestal choice, purchase, altar, gambler, brazier, loot left on the
+    floor, portal: about thirty decisions in a run, the same rules for the
+    teacher and the learned agent. None while enemies are up, or when the
+    room offers nothing: then the fight, or the navigation, is someone
+    else's business.
+    """
+    if obs.state != "play" or obs.enemy_count or obs.spawning:
+        return None
+    choice = _best_choice_item(obs)
+    if choice and obs.room_type not in NO_LOOT_ROOM_TYPES:
+        return "interact" if choice["distance"] <= 55 else _travel(obs, choice)
+    if (
+        obs.near_choice
+        and obs.near_choice["distance"] <= 58
+        and obs.room_type not in NO_LOOT_ROOM_TYPES
+    ):
+        return "interact"
+    altar = _altar_action(obs)
+    if altar:
+        return altar
+    shop = _best_shop_item(obs)
+    if shop:
+        return "interact" if shop["distance"] <= 58 else _travel(obs, shop)
+    pickup = _best_pickup(obs)
+    if pickup and pickup["distance"] > 20:
+        return _collect(obs, pickup)
+    if obs.portal_active and obs.portal:
+        return "interact" if obs.portal["distance"] <= 65 else _travel(obs, obs.portal)
+    return None
+
+
+def _boss_prefer_v2(obs: Observation, boss: dict) -> tuple[tuple[float, float] | None, bool] | None:
+    """Where to head during the attacks the keyboard rules got wrong.
+
+    Read from js/game/boss.js. The simulation (mover.py) already refuses
+    whatever gets hit inside 0.6 s; this only says which way to lean when
+    the hit is further away than that. None = no opinion (the distance
+    band and the older responses decide).
+    """
+    if boss.get("state") != "attack":
+        return None
+    name = boss.get("attack")
+    step = boss.get("attack_step", 0)
+    t = boss.get("attack_time", 0.0)
+    lock = boss.get("lock_dir", [0.0, 0.0])
+    aux2 = boss.get("aux2", [0.0, 0.0])
+    away = lambda x, y: _unit(obs.x - x, obs.y - y)
+    if name == "mirrorEcho" and step >= 1:
+        # the echo detonates in a ring where the boss WAS (auxX/Y)
+        return away(lock[0], lock[1]), False
+    if name == "shatterClone" and step >= 1:
+        near = min(((lock[0], lock[1]), (aux2[0], aux2[1])),
+                   key=lambda q: math.hypot(q[0] - obs.x, q[1] - obs.y))
+        return away(*near), False
+    if name == "brambleRing" and step >= 1:
+        # seven zones at 130 px around the player at the cast, one gap:
+        # the disc at the centre is free - stand still if still in it
+        ring = [hz for hz in obs.hazards if abs(hz.get("r", 0) - 55) < 1]
+        if len(ring) >= 5:
+            cx = sum(hz["x"] for hz in ring) / len(ring)
+            cy = sum(hz["y"] for hz in ring) / len(ring)
+            if math.hypot(cx - obs.x, cy - obs.y) < 40:
+                return None, True
+        return None
+    if name == "frostNova" and step >= 1:
+        # four arms, straight or diagonal: the refuge is the other family
+        arms = [hz for hz in obs.hazards if abs(hz.get("r", 0) - 52) < 1]
+        if arms:
+            a0 = math.atan2(arms[0]["y"] - boss["y"], arms[0]["x"] - boss["x"])
+            diagonal = abs(((a0 % (math.pi / 2)) - math.pi / 4)) < math.pi / 8
+            bearing = math.atan2(obs.y - boss["y"], obs.x - boss["x"])
+            base = 0.0 if diagonal else math.pi / 4
+            best = min((base + k * math.pi / 2 for k in range(4)),
+                       key=lambda a: abs((a - bearing + math.pi) % (2 * math.pi) - math.pi))
+            d = max(150.0, math.hypot(obs.x - boss["x"], obs.y - boss["y"]))
+            gx, gy = boss["x"] + math.cos(best) * d, boss["y"] + math.sin(best) * d
+            return _unit(gx - obs.x, gy - obs.y), False
+        return None
+    if name == "tripleLunge" and step < 6:
+        # keep out of the lunge's reach (161-200 px); sidestep once locked
+        d = math.hypot(boss["x"] - obs.x, boss["y"] - obs.y)
+        if d >= 250:
+            return None
+        u = _unit(boss["x"] - obs.x, boss["y"] - obs.y)
+        side = (-u[1], u[0])
+        if _last_dir is not None and side[0] * _last_dir[0] + side[1] * _last_dir[1] < 0:
+            side = (u[1], -u[0])
+        return side, False
+    if name == "aftershock" and step == 0:
+        # be more than 300 px from the boss when the rings burst
+        return away(boss["x"], boss["y"]), False
+    if name == "slamQuake" and step == 0:
+        return away(boss["x"], boss["y"]), False
+    if name == "sweepBeam" and t >= 0.4:
+        # the beam sweeps from base-0.7 toward base+0.7: orbit toward the
+        # side it started on (behind the sweep)
+        bearing = math.atan2(obs.y - boss["y"], obs.x - boss["x"])
+        start = aux2[0] if step >= 1 else math.atan2(lock[1], lock[0]) - 0.7
+        diff = (start - bearing + math.pi) % (2 * math.pi) - math.pi
+        sign = 1.0 if diff > 0 else -1.0
+        return (-math.sin(bearing) * sign, math.cos(bearing) * sign), False
+    if name == "heavyCharge" and step >= 2:
+        # stunned: stand in the band and shoot
+        return None, False
+    return None

@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from src.agent2 import HybridAgent
 from src.dqn import DQNAgent
 from src.eos_env import ACTIONS, EclipseEnv
 from src.features import featurize
@@ -39,7 +40,9 @@ def parse_args() -> argparse.Namespace:
         default="heuristic",
         help="'heuristic' (keyboard aim, eight rays), 'teacher' (the same "
         "rules with the mouse aim; options after a colon, e.g. "
-        "'teacher:lead,priority,fire') or the path to a saved agent (JSON).",
+        "'teacher:lead,priority,fire'), 'hybrid:<model.json>' (the phase 5 "
+        "agent: learned pilot, shared aim and inventory reflexes) or the "
+        "path to a saved agent (JSON).",
     )
     parser.add_argument("--episodes", type=int, default=20)
     parser.add_argument("--max-steps", type=int, default=9000)
@@ -70,7 +73,10 @@ def parse_args() -> argparse.Namespace:
 
 def teacher_options(spec: str) -> dict[str, bool]:
     """'teacher:lead,priority' -> the keyword flags of heuristic_decision."""
-    names = {"lead": "lead", "priority": "priority", "fire": "always_fire"}
+    names = {
+        "lead": "lead", "priority": "priority", "fire": "always_fire",
+        "mover": "predictive", "build": "build", "bosses": "bosses",
+    }
     options = {flag: False for flag in names.values()}
     _, _, tail = spec.partition(":")
     for token in filter(None, tail.split(",")):
@@ -93,10 +99,13 @@ def audit_shard(job: dict) -> dict:
     cfg = job["cfg"]
     agent = None
     teacher = None
+    hybrid = None
     if cfg["policy"] == "heuristic":
         pass
     elif cfg["policy"].startswith("teacher"):
         teacher = teacher_options(cfg["policy"])
+    elif cfg["policy"].startswith("hybrid:"):
+        hybrid = HybridAgent.load(cfg["policy"][7:], epsilon=cfg["epsilon"])
     else:
         agent = DQNAgent.load(Path(cfg["policy"]))
 
@@ -133,6 +142,8 @@ def audit_shard(job: dict) -> dict:
                 aim = None
                 if teacher is not None:
                     action, aim = heuristic_decision(obs, **teacher)
+                elif hybrid is not None:
+                    action, aim, _ = hybrid.act(obs, previous)
                 elif agent is None:
                     action = heuristic_action(obs)
                 else:
@@ -176,7 +187,10 @@ def audit_shard(job: dict) -> dict:
                 # The fatal blow counts too: the game names its author before
                 # switching to the game-over screen, and a table that stops
                 # one hit short of every death undercounts the runs' end.
-                if obs.hp < before.hp:
+                # A drop of max life (the sacrifice altar) clamps the bar
+                # without anyone striking: not a hit, and the culprit the
+                # game still names would be the previous one.
+                if obs.hp < before.hp and obs.max_hp >= before.max_hp:
                     boss, attack = _boss_attack(before)
                     hp_left = max(0, obs.hp)
                     hits.append(
@@ -253,7 +267,10 @@ def audit_shard(job: dict) -> dict:
 
 def main() -> None:
     args = parse_args()
-    if args.policy != "heuristic" and not args.policy.startswith("teacher"):
+    if args.policy.startswith("hybrid:"):
+        probe = HybridAgent.load(args.policy[7:]).net
+        print(f"policy={args.policy} features={probe.n_features} heads={probe.heads}", flush=True)
+    elif args.policy != "heuristic" and not args.policy.startswith("teacher"):
         probe = DQNAgent.load(Path(args.policy))
         print(
             f"policy={args.policy} features={probe.n_features} "
