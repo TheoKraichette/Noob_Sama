@@ -1,0 +1,748 @@
+episode,step,floor,room_type,lost,hp_left,fatal,killer,killer_was_boss,boss,boss_attack,enemies,hazards,shots
+1,838,2,combat,1,5,False,un projectile ennemi,False,,,2,5,3
+1,999,2,combat,1,4,False,un projectile ennemi,False,,,4,0,9
+1,1023,2,combat,1,3,False,un projectile ennemi,False,,,3,0,8
+1,1651,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,0,5
+1,1768,2,boss,1,4,False,un projectile ennemi,False,tisseuse,,1,0,7
+1,2200,3,combat,1,4,False,Âme errante,False,,,6,0,0
+1,2469,3,combat,2,3,False,Traqueur,False,,,4,0,0
+1,2859,3,miniboss,4,2,False,Golem sépulcral (élite spectrale),False,,,1,0,0
+1,3251,3,boss,3,1,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+1,3547,3,boss,1,0,True,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+5,833,2,combat,1,5,False,Grimoire déchaîné,False,,,1,0,11
+5,1274,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,0,7
+5,1330,2,boss,1,4,False,un projectile ennemi,False,tisseuse,,3,0,5
+5,2538,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+5,2653,3,boss,2,1,False,un projectile ennemi,False,pyroclaste,,1,0,16
+9,514,1,boss,1,5,False,un projectile ennemi,False,sylve,,2,1,2
+9,1107,2,combat,2,4,False,Traqueur,False,,,7,0,0
+9,1494,2,boss,1,5,False,un projectile ennemi,False,tisseuse,summonWave,1,0,7
+9,1629,2,boss,1,4,False,un projectile ennemi,False,tisseuse,,1,0,8
+9,1802,2,boss,1,3,False,un projectile ennemi,False,tisseuse,,1,0,16
+9,2209,2,boss,1,2,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,16
+9,2368,2,boss,1,1,False,un projectile ennemi,False,tisseuse,,1,0,11
+9,2394,2,boss,1,0,True,un projectile ennemi,False,tisseuse,,1,0,16
+13,1065,2,combat,1,5,False,un projectile ennemi,False,,,1,0,3
+13,1083,2,combat,1,4,False,un projectile ennemi,False,,,0,0,3
+13,1376,2,boss,1,5,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,5
+13,1527,2,boss,1,4,False,un projectile ennemi,False,tisseuse,summonWave,1,0,9
+13,2231,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,4,0
+13,2786,4,combat,3,3,False,Traqueur,False,,,8,0,0
+13,3047,4,combat,3,3,False,Golem sépulcral,False,,,6,0,0
+13,3440,4,combat,3,3,False,Âme errante (élite vampirique),False,,,3,0,0
+13,3447,4,combat,2,1,False,Âme errante,False,,,8,0,0
+13,3953,4,boss,2,4,False,un projectile ennemi,False,gorgone,,2,0,16
+13,3962,4,boss,2,2,False,un projectile ennemi,False,gorgone,fanVolley,2,16,16
+13,3993,4,boss,2,0,True,un projectile ennemi,False,gorgone,tidalPulse,2,0,16
+17,95,1,combat,1,5,False,Traqueur,False,,,4,0,0
+17,436,1,miniboss,1,5,False,Âme errante,False,,,5,0,0
+17,579,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+17,585,1,boss,2,2,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+17,617,1,boss,2,0,True,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,2,0
+21,955,2,combat,2,6,False,Grimoire déchaîné (élite invocatrice),False,,,3,0,1
+21,1245,2,combat,1,7,False,Grimoire déchaîné,False,,,6,0,1
+21,1357,2,altar,2,6,False,Grimoire déchaîné,False,,,0,0,0
+21,1604,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,0,8
+21,1745,2,boss,1,4,False,un projectile ennemi,False,,,0,0,14
+21,1921,3,scelle,3,2,False,Zéphyr avide (élite spectrale),False,,,4,0,0
+21,2546,3,boss,3,3,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+21,2554,3,boss,3,0,True,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+25,585,1,boss,1,5,False,un projectile ennemi,False,,,0,3,16
+25,1076,2,combat,2,4,False,Âme errante (élite explosive),False,,,3,0,0
+25,1179,2,combat,1,3,False,un projectile ennemi,False,,,0,0,7
+25,1278,2,boss,1,2,False,un projectile ennemi,False,zenith,,1,0,6
+25,1554,2,boss,1,1,False,un projectile ennemi,False,zenith,,1,0,16
+25,1598,2,boss,1,0,True,un projectile ennemi,False,zenith,blinkAway,1,0,15
+29,1223,2,boss,1,5,False,un projectile ennemi,False,,,0,4,16
+29,2738,4,combat,2,4,False,un projectile ennemi,False,,,1,0,1
+29,3054,4,combat,2,4,False,un projectile ennemi,False,,,2,0,2
+29,3578,4,combat,2,4,False,un projectile ennemi,False,,,2,0,1
+29,3913,4,boss,2,3,False,un projectile ennemi,False,miroir,,2,16,5
+29,4836,5,combat,2,4,False,Écho d’âme,False,,,7,0,4
+29,5244,5,boss,2,4,False,un projectile ennemi,False,eclipse,,1,0,15
+29,5313,5,boss,2,2,False,un projectile ennemi,False,eclipse,,1,0,11
+29,5328,5,boss,2,0,True,un projectile ennemi,False,eclipse,,1,0,5
+33,726,1,boss,2,6,False,"Vorace, Gueule de la Crypte",True,vorace,,1,0,0
+33,775,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,2,0
+33,910,2,combat,1,3,False,un projectile ennemi,False,,,0,0,1
+33,1189,2,altar,1,6,False,un projectile ennemi,False,,,0,0,0
+33,2156,3,combat,4,2,False,Cœur de brasier (élite explosive),False,,,5,1,2
+33,2605,3,combat,1,3,False,Âme errante,False,,,3,2,0
+33,2972,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+33,3308,4,combat,2,1,False,Âme errante (élite spectrale),False,,,3,0,3
+33,3315,4,combat,1,0,True,Âme errante (élite spectrale),False,,,3,0,2
+37,1046,2,combat,1,5,False,un projectile ennemi,False,,,3,0,7
+37,2418,3,boss,2,4,False,un projectile ennemi,False,,,0,0,14
+37,3768,5,combat,1,5,False,un projectile ennemi,False,,,0,0,11
+37,4162,5,boss,2,4,False,un projectile ennemi,False,eclipse,blinkAway,1,1,10
+41,1191,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,0,7
+41,1363,2,boss,1,4,False,un projectile ennemi,False,tisseuse,spiralBurst,1,0,9
+41,2223,3,combat,3,3,False,Zéphyr avide (élite invocatrice),False,,,10,0,0
+41,2249,3,combat,2,1,False,Traqueur,False,,,11,0,0
+41,2486,3,boss,2,4,False,un projectile ennemi,False,zenith,sweepBeam,1,0,16
+41,2688,3,boss,2,2,False,un projectile ennemi,False,zenith,sweepBeam,1,1,15
+41,2712,3,boss,2,0,True,un projectile ennemi,False,zenith,doubleRing,1,1,16
+49,768,2,combat,1,5,False,un projectile ennemi,False,,,3,0,6
+49,1125,2,combat,1,5,False,un projectile ennemi,False,,,6,0,4
+49,1686,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,3,0,5
+49,1705,2,boss,1,4,False,un projectile ennemi,False,tisseuse,,1,0,8
+49,2202,3,combat,2,2,False,Âme errante,False,,,3,0,0
+49,2839,3,combat,2,4,False,Escarbille,False,,,6,3,0
+49,3324,3,boss,2,3,False,une éruption tellurique,False,colosse,,1,12,0
+49,3352,3,boss,3,0,True,Le Colosse d’Ossements,True,colosse,,3,0,0
+53,869,2,combat,1,5,False,Grimoire déchaîné,False,,,8,0,0
+53,1546,2,combat,1,11,False,Grimoire déchaîné,False,,,3,0,1
+53,1949,2,boss,1,11,False,un projectile ennemi,False,tisseuse,,1,0,16
+53,2077,2,boss,1,10,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,6
+53,2107,2,boss,1,9,False,un projectile ennemi,False,,,0,0,4
+53,3095,3,altar,2,12,False,un projectile ennemi,False,,,0,0,0
+53,3772,4,altar,2,10,False,un projectile ennemi,False,,,0,0,0
+53,5039,5,combat,1,13,False,un projectile ennemi,False,,,0,0,2
+53,5236,5,altar,2,12,False,un projectile ennemi,False,,,0,0,0
+53,5317,5,boss,2,10,False,un projectile ennemi,False,eclipse,,1,0,16
+53,5561,5,boss,2,8,False,un projectile ennemi,False,eclipse,,1,2,15
+57,766,2,combat,1,7,False,un projectile ennemi,False,,,2,0,6
+57,798,2,combat,1,6,False,un projectile ennemi,False,,,0,0,6
+57,868,2,combat,1,6,False,Grimoire déchaîné,False,,,4,0,3
+57,915,2,combat,1,5,False,Grimoire déchaîné,False,,,1,0,3
+57,1382,2,boss,1,7,False,un projectile ennemi,False,tisseuse,,1,0,5
+57,1400,2,boss,1,6,False,un projectile ennemi,False,tisseuse,,1,0,9
+57,1454,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,0,5
+57,1711,3,combat,2,5,False,Âme errante,False,,,1,1,0
+57,2149,3,combat,3,5,False,Cœur de brasier,False,,,5,2,0
+57,2340,3,altar,2,6,False,Cœur de brasier,False,,,0,0,0
+57,2636,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,3,0
+57,2787,3,boss,2,1,False,un projectile ennemi,False,pyroclaste,,1,0,16
+57,3512,4,combat,3,3,False,Noyé,False,,,8,0,0
+57,3571,4,combat,2,1,False,un projectile ennemi,False,,,5,0,4
+57,3987,4,boss,2,4,False,une éruption tellurique,False,gorgone,tidalPulse,2,3,12
+57,4022,4,boss,2,2,False,un projectile ennemi,False,zenith,,1,3,5
+57,4122,4,boss,2,0,True,un projectile ennemi,False,,,0,0,15
+61,853,2,combat,1,5,False,un projectile ennemi,False,,,0,0,4
+61,1443,2,boss,2,6,False,un projectile ennemi,False,,,0,0,5
+61,2017,3,combat,1,5,False,un projectile ennemi,False,,,4,0,2
+61,2074,3,combat,1,5,False,un projectile ennemi,False,,,1,0,1
+61,2797,4,combat,2,4,False,un projectile ennemi,False,,,5,0,1
+61,3020,4,combat,2,4,False,un projectile ennemi,False,,,4,0,3
+61,3115,4,combat,2,3,False,un projectile ennemi,False,,,1,0,1
+61,4079,4,boss,2,4,False,un projectile ennemi,False,gorgone,,1,0,8
+61,4093,4,boss,2,2,False,un projectile ennemi,False,gorgone,tidalPulse,1,0,4
+61,4176,4,boss,2,0,True,un projectile ennemi,False,gorgone,tidalPulse,1,3,5
+65,1139,2,miniboss,1,7,False,un projectile ennemi,False,,,1,0,1
+65,1236,2,miniboss,1,6,False,un projectile ennemi,False,,,0,0,1
+65,1387,2,combat,1,7,False,un projectile ennemi,False,,,3,0,6
+65,1651,2,boss,2,5,False,Le Colosse d’Ossements,True,colosse,,3,0,0
+65,1948,3,combat,2,5,False,Âme errante,False,,,6,0,0
+65,2762,3,combat,1,10,False,une éruption tellurique,False,,,8,2,0
+65,2798,3,combat,1,9,False,une éruption tellurique,False,,,8,3,0
+65,2803,3,combat,2,7,False,Âme errante,False,,,7,0,0
+65,2919,3,combat,2,5,False,Âme errante,False,,,7,0,0
+65,3058,3,combat,4,1,False,Cœur de brasier (élite invocatrice),False,,,9,0,1
+65,3064,3,combat,1,0,True,Cœur de brasier (élite invocatrice),False,,,9,1,1
+69,1594,2,altar,2,10,False,,False,,,0,0,0
+69,2040,2,boss,1,9,False,un projectile ennemi,False,tisseuse,,1,0,16
+69,2093,2,boss,1,8,False,un projectile ennemi,False,tisseuse,,1,1,16
+69,2181,2,boss,1,7,False,un projectile ennemi,False,,,0,0,16
+69,2358,3,combat,3,6,False,Cœur de brasier,False,,,5,4,0
+69,2415,3,combat,2,4,False,Âme errante,False,,,5,0,0
+69,2892,3,combat,4,4,False,Cœur de brasier (élite explosive),False,,,2,3,0
+69,3393,3,combat,2,5,False,Spectre,False,,,5,3,0
+69,3862,3,boss,2,4,False,un projectile ennemi,False,pyroclaste,,1,0,14
+69,3893,3,boss,2,2,False,une éruption tellurique,False,pyroclaste,slamQuake,1,0,0
+69,4056,3,boss,2,0,True,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+73,57,1,combat,1,5,False,une éruption tellurique,False,,,0,1,0
+73,565,1,boss,1,5,False,une éruption tellurique,False,sylve,,1,4,0
+73,711,1,boss,1,4,False,un projectile ennemi,False,,,0,2,16
+73,785,2,combat,1,3,False,un projectile ennemi,False,,,1,0,3
+73,1207,2,combat,1,5,False,Âme errante,False,,,4,0,0
+73,1748,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,4,11
+73,1870,3,combat,2,3,False,Zéphyr avide,False,,,4,0,0
+73,2020,3,combat,3,1,False,Golem sépulcral,False,,,3,0,0
+73,2034,3,combat,1,0,True,Golem sépulcral,False,,,2,0,0
+77,164,1,combat,2,4,False,Ronce rampante,False,,,3,1,0
+77,500,1,boss,1,5,False,une éruption tellurique,False,sylve,,1,1,0
+77,854,2,altar,1,6,False,une éruption tellurique,False,,,0,0,0
+77,1062,2,miniboss,3,3,False,Golem sépulcral (élite glaciale),False,,,1,0,0
+77,1190,2,combat,1,4,False,Grimoire déchaîné,False,,,7,0,0
+77,1739,2,boss,1,4,False,un projectile ennemi,False,zenith,doubleRing,1,0,16
+77,1812,3,combat,2,2,False,Spectre,False,,,7,0,0
+77,2339,3,combat,3,0,True,Traqueur,False,,,5,0,0
+2,625,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+2,684,1,boss,2,2,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,2,0
+2,812,2,combat,1,3,False,Grimoire déchaîné,False,,,3,0,1
+2,974,2,combat,1,3,False,Grimoire déchaîné,False,,,2,0,3
+2,1073,2,scelle,2,1,False,Grimoire déchaîné (élite glaciale),False,,,5,0,0
+2,1115,2,scelle,1,0,True,Grimoire déchaîné (élite glaciale),False,,,4,0,1
+6,589,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,2,0
+6,705,2,combat,1,4,False,un projectile ennemi,False,,,1,0,4
+6,726,2,combat,1,3,False,un projectile ennemi,False,,,1,4,3
+6,1177,2,altar,1,8,False,un projectile ennemi,False,,,0,0,0
+6,2027,3,combat,2,6,False,Âme errante,False,,,3,0,0
+6,2034,3,combat,3,3,False,Traqueur (élite vampirique),False,,,3,0,0
+6,2344,3,miniboss,4,1,False,Traqueur (élite vampirique),False,,,1,2,0
+6,2730,3,boss,3,0,True,Le Pyroclaste,True,pyroclaste,magmaWake,1,2,0
+10,711,2,combat,2,4,False,Grimoire déchaîné (élite invocatrice),False,,,4,0,4
+10,843,2,combat,1,4,False,Grimoire déchaîné,False,,,5,0,0
+10,1755,2,boss,1,5,False,un projectile ennemi,False,zenith,,1,0,16
+10,2086,3,combat,1,5,False,un projectile ennemi,False,,,4,0,1
+10,2570,3,combat,1,7,False,un projectile ennemi,False,,,4,0,2
+10,3547,3,boss,2,6,False,une éruption tellurique,False,colosse,slamQuake,1,0,0
+10,3573,3,boss,3,3,False,Le Colosse d’Ossements,True,colosse,,1,12,0
+10,3937,4,combat,2,4,False,un projectile ennemi,False,,,1,0,1
+10,5024,4,boss,2,6,False,un projectile ennemi,False,tisseuse,,1,2,12
+10,5103,4,boss,2,4,False,un projectile ennemi,False,tisseuse,spiralBurst,1,1,11
+10,5302,4,boss,2,2,False,un projectile ennemi,False,,,0,0,5
+10,5356,5,combat,2,0,True,Écho d’âme (élite vampirique),False,,,8,2,0
+14,652,1,boss,1,5,False,un projectile ennemi,False,vorace,,1,2,16
+14,1043,2,combat,1,5,False,Grimoire déchaîné,False,,,6,0,0
+14,1096,2,combat,1,4,False,Grimoire déchaîné,False,,,1,0,7
+14,1499,2,boss,1,5,False,un projectile ennemi,False,zenith,,1,0,16
+14,1560,2,boss,1,4,False,un projectile ennemi,False,zenith,,1,0,16
+14,1586,2,boss,1,3,False,un projectile ennemi,False,zenith,,1,0,15
+14,1832,2,boss,1,2,False,un projectile ennemi,False,zenith,blinkAway,1,0,16
+14,1922,2,boss,1,1,False,un projectile ennemi,False,zenith,,1,0,6
+14,1969,2,boss,1,0,True,une éruption tellurique,False,zenith,blinkAway,1,1,10
+18,949,2,combat,1,5,False,Grimoire déchaîné,False,,,2,0,3
+18,1247,2,boss,1,5,False,un projectile ennemi,False,zenith,,1,0,16
+18,1846,3,combat,3,3,False,Zéphyr avide,False,,,3,0,0
+18,1927,3,combat,2,1,False,Âme errante,False,,,5,0,0
+18,1938,3,combat,1,0,True,Âme errante (élite vampirique),False,,,3,0,0
+22,523,1,boss,1,7,False,un projectile ennemi,False,sylve,,1,0,5
+22,1138,2,combat,1,8,False,un projectile ennemi,False,,,3,0,8
+22,1145,2,combat,1,7,False,un projectile ennemi,False,,,3,5,5
+22,1168,2,combat,1,6,False,un projectile ennemi,False,,,3,0,3
+22,1512,2,boss,1,9,False,un projectile ennemi,False,tisseuse,,1,0,9
+22,1557,2,boss,1,8,False,un projectile ennemi,False,tisseuse,summonWave,2,0,5
+22,1991,3,altar,2,10,False,un projectile ennemi,False,,,0,0,0
+22,2019,3,combat,2,8,False,Âme errante,False,,,9,3,0
+22,2096,3,combat,4,5,False,Cœur de brasier (élite glaciale),False,,,3,2,0
+22,2102,3,combat,4,1,False,Cœur de brasier (élite glaciale),False,,,3,3,0
+22,2170,3,combat,1,0,True,Âme errante,False,,,4,0,0
+26,643,2,combat,1,5,False,un projectile ennemi,False,,,5,0,4
+26,674,2,combat,1,4,False,Grimoire déchaîné,False,,,3,0,3
+26,808,2,combat,1,3,False,Traqueur,False,,,1,0,0
+26,1138,2,combat,1,5,False,un projectile ennemi,False,,,1,0,4
+26,1157,2,combat,1,4,False,un projectile ennemi,False,,,0,0,1
+26,1267,2,miniboss,1,3,False,un projectile ennemi,False,,,1,0,1
+26,1371,2,boss,1,4,False,un projectile ennemi,False,zenith,,1,0,14
+26,1446,2,boss,1,3,False,un projectile ennemi,False,zenith,sweepBeam,1,0,16
+26,1490,2,boss,1,2,False,un projectile ennemi,False,zenith,blinkAway,1,0,2
+26,1519,2,boss,1,1,False,un projectile ennemi,False,zenith,,1,0,6
+26,1564,2,boss,1,0,True,un projectile ennemi,False,zenith,sweepBeam,1,0,16
+30,1095,2,altar,2,6,False,,False,,,0,0,0
+30,1202,2,combat,1,5,False,un projectile ennemi,False,,,2,0,7
+30,1748,2,boss,1,5,False,une éruption tellurique,False,colosse,,1,14,0
+30,1762,2,boss,2,3,False,Le Colosse d’Ossements,True,colosse,slamQuake,1,2,0
+30,3538,4,combat,2,4,False,Traqueur,False,,,9,0,0
+30,3544,4,combat,4,0,True,Noyé (élite spectrale),False,,,8,0,0
+34,878,2,combat,1,7,False,Grimoire déchaîné,False,,,2,0,2
+34,917,2,combat,1,6,False,un projectile ennemi,False,,,0,1,5
+34,1362,2,boss,1,7,False,un projectile ennemi,False,zenith,,1,0,16
+34,1747,2,boss,1,6,False,un projectile ennemi,False,zenith,blinkAway,1,1,16
+34,2615,3,combat,3,6,False,Cœur de brasier,False,,,2,3,1
+34,3056,3,combat,3,11,False,Cœur de brasier,False,,,6,0,2
+34,3114,3,combat,1,10,False,un projectile ennemi,False,,,4,0,2
+34,3523,3,boss,2,9,False,une éruption tellurique,False,colosse,,1,12,0
+34,3543,3,boss,1,8,False,Âme errante,False,colosse,,3,0,0
+34,3886,4,combat,2,8,False,Âme errante,False,,,6,0,0
+34,4008,4,combat,3,6,False,Traqueur,False,,,8,0,0
+34,4231,4,combat,2,4,False,Âme errante,False,,,5,0,0
+34,4424,4,scelle,1,3,False,Ombrelette,False,,,6,0,0
+34,5330,4,combat,1,9,False,une éruption tellurique,False,,,1,1,0
+34,5843,5,combat,2,11,False,un projectile ennemi,False,,,3,0,1
+34,6167,5,combat,2,12,False,Écho d’âme,False,,,8,0,0
+34,6452,5,boss,2,12,False,un projectile ennemi,False,eclipse,fanVolley,3,0,11
+34,6502,5,boss,2,10,False,un projectile ennemi,False,eclipse,,1,0,5
+34,6598,5,boss,2,8,False,un projectile ennemi,False,eclipse,blinkAway,1,2,7
+34,6628,5,boss,2,6,False,un projectile ennemi,False,eclipse,blinkAway,1,2,7
+34,6695,5,boss,2,4,False,une éruption tellurique,False,eclipse,doubleRing,1,7,0
+34,6710,5,boss,2,2,False,une éruption tellurique,False,eclipse,mirrorEcho,1,2,10
+34,6972,5,boss,1,1,False,un projectile ennemi,False,eclipse,spiralBurst,1,0,16
+34,6983,5,boss,1,0,True,un projectile ennemi,False,eclipse,summonWave,1,2,16
+38,738,2,combat,1,5,False,Grimoire déchaîné,False,,,4,0,2
+38,858,2,combat,3,3,False,Traqueur (élite spectrale),False,,,3,0,3
+38,988,2,combat,2,3,False,Grimoire déchaîné (élite explosive),False,,,4,0,3
+38,1875,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,0,13
+38,2527,3,combat,4,2,False,Cœur de brasier (élite explosive),False,,,3,0,1
+38,2617,3,combat,2,1,False,Cendre instable,False,,,0,0,0
+38,2628,3,combat,1,0,True,Cendre instable,False,,,7,3,0
+42,1331,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,0,5
+42,1569,2,boss,1,4,False,un projectile ennemi,False,,,0,0,16
+42,1734,3,combat,3,3,False,Âme errante (élite explosive),False,,,7,0,0
+42,2876,3,boss,2,6,False,un projectile ennemi,False,,,0,1,12
+42,3105,4,scelle,2,4,False,un projectile ennemi,False,,,2,0,2
+42,3478,4,combat,2,5,False,un projectile ennemi,False,,,5,0,2
+42,4216,4,boss,2,6,False,un projectile ennemi,False,vorace,,2,0,16
+42,4244,4,boss,2,4,False,un projectile ennemi,False,gorgone,tidalPulse,2,0,15
+42,4366,4,boss,2,2,False,un projectile ennemi,False,vorace,doubleRing,2,0,16
+42,4443,4,boss,2,0,True,un projectile ennemi,False,,,0,0,16
+46,521,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,,1,0,0
+46,705,2,combat,1,7,False,un projectile ennemi,False,,,3,0,8
+46,749,2,combat,1,6,False,un projectile ennemi,False,,,1,5,3
+46,840,2,combat,1,5,False,un projectile ennemi,False,,,2,0,2
+46,1238,2,combat,3,6,False,Traqueur (élite invocatrice),False,,,3,0,0
+46,1761,2,boss,1,6,False,un projectile ennemi,False,tisseuse,spiralBurst,1,0,9
+46,1957,2,boss,1,5,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,4,5
+46,2079,2,boss,1,4,False,un projectile ennemi,False,tisseuse,,1,3,16
+46,2095,2,boss,1,3,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,4,6
+46,2492,3,combat,2,3,False,Zéphyr avide,False,,,5,1,2
+46,2651,3,scelle,3,2,False,Spectre (élite spectrale),False,,,3,0,0
+46,3260,3,boss,2,4,False,un projectile ennemi,False,zenith,,1,0,15
+46,3883,3,boss,2,2,False,un projectile ennemi,False,zenith,doubleRing,1,1,15
+46,4011,4,combat,2,0,True,Âme errante (élite explosive),False,,,3,0,2
+50,1378,2,miniboss,1,7,False,un projectile ennemi,False,,,1,0,1
+50,1748,2,boss,1,7,False,un projectile ennemi,False,zenith,sweepBeam,1,0,14
+50,1800,2,boss,1,6,False,un projectile ennemi,False,zenith,doubleRing,1,1,15
+50,2386,3,combat,3,5,False,Zéphyr avide (élite explosive),False,,,5,0,0
+50,2400,3,combat,3,2,False,Zéphyr avide (élite spectrale),False,,,5,0,0
+50,2587,3,scelle,3,1,False,Âme errante (élite explosive),False,,,4,0,2
+50,2626,3,scelle,1,0,True,un projectile ennemi,False,,,3,0,1
+54,705,2,combat,1,7,False,un projectile ennemi,False,,,3,0,6
+54,963,2,combat,1,7,False,Grimoire déchaîné,False,,,6,0,0
+54,1249,2,miniboss,1,7,False,Âme errante,False,,,3,0,0
+54,1860,2,boss,1,7,False,un projectile ennemi,False,,,0,0,14
+54,1912,3,combat,3,8,False,Âme errante (élite glaciale),False,,,6,3,0
+54,1917,3,combat,2,6,False,Âme errante,False,,,6,2,0
+54,1946,3,combat,2,4,False,Âme errante,False,,,6,3,0
+54,2074,3,combat,2,3,False,Âme errante,False,,,6,3,0
+54,2365,3,combat,3,1,False,Golem sépulcral,False,,,4,1,2
+54,2633,3,combat,3,0,True,Golem sépulcral,False,,,4,2,0
+58,768,2,combat,1,5,False,un projectile ennemi,False,,,4,0,4
+58,1155,2,combat,2,4,False,Traqueur,False,,,3,0,0
+58,1278,2,scelle,2,2,False,Grimoire déchaîné (élite glaciale),False,,,5,0,0
+58,1343,2,scelle,1,1,False,un projectile ennemi,False,,,0,0,7
+58,1361,2,scelle,1,2,False,un projectile ennemi,False,,,0,0,1
+58,1922,3,combat,2,0,True,Spectre,False,,,3,0,0
+62,714,2,altar,2,6,False,,False,,,0,0,0
+62,812,2,combat,1,5,False,un projectile ennemi,False,,,1,0,3
+62,939,2,combat,1,4,False,un projectile ennemi,False,,,0,0,3
+62,1134,2,miniboss,3,1,False,Golem sépulcral (élite spectrale),False,,,1,2,0
+62,1139,2,miniboss,1,0,True,Golem sépulcral (élite spectrale),False,,,1,0,0
+66,938,2,combat,1,5,False,un projectile ennemi,False,,,1,0,1
+66,1087,2,combat,1,4,False,un projectile ennemi,False,,,3,0,5
+66,1797,2,boss,1,5,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,5
+66,1884,2,boss,1,4,False,un projectile ennemi,False,tisseuse,,2,0,5
+66,2142,2,boss,1,3,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,10
+66,2529,3,combat,3,3,False,Spectre (élite glaciale),False,,,5,0,0
+66,3175,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+66,3243,3,boss,3,0,True,Le Pyroclaste,True,pyroclaste,rockRain,1,5,0
+70,943,2,combat,1,7,False,Traqueur,False,,,5,0,3
+70,964,2,combat,2,5,False,Traqueur,False,,,4,0,3
+70,988,2,combat,1,4,False,un projectile ennemi,False,,,4,5,3
+70,1172,2,combat,2,2,False,Âme errante (élite vampirique),False,,,2,0,0
+70,1180,2,combat,1,1,False,Âme errante,False,,,2,0,0
+70,1258,2,combat,1,0,True,Âme errante (élite vampirique),False,,,1,0,0
+74,109,1,combat,1,5,False,une éruption tellurique,False,,,0,1,0
+74,497,1,boss,1,5,False,un projectile ennemi,False,sylve,,1,1,5
+74,1095,2,combat,1,5,False,un projectile ennemi,False,,,1,0,3
+74,1570,2,boss,1,5,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,5
+74,2047,3,combat,3,3,False,Âme errante (élite vampirique),False,,,3,0,0
+74,3262,3,boss,2,10,False,une éruption tellurique,False,colosse,,1,5,0
+74,3282,3,boss,2,8,False,une éruption tellurique,False,colosse,,1,12,0
+74,3297,3,boss,3,5,False,Le Colosse d’Ossements,True,colosse,,1,5,0
+74,3302,3,boss,3,2,False,Le Colosse d’Ossements,True,colosse,,1,0,0
+74,3818,4,combat,2,10,False,un projectile ennemi,False,,,0,0,1
+74,4077,4,altar,2,10,False,un projectile ennemi,False,,,0,0,0
+74,4292,4,boss,2,8,False,un projectile ennemi,False,,,0,0,16
+74,4669,5,altar,2,8,False,un projectile ennemi,False,,,0,0,0
+74,5254,5,boss,2,6,False,un projectile ennemi,False,eclipse,,1,0,11
+78,720,1,boss,1,5,False,un projectile ennemi,False,sylve,,1,0,16
+78,922,2,combat,1,5,False,un projectile ennemi,False,,,0,0,4
+78,1070,2,combat,1,5,False,Grimoire déchaîné,False,,,5,0,4
+78,1077,2,combat,1,4,False,Grimoire déchaîné,False,,,5,0,3
+78,1460,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,2,0,4
+78,2111,3,combat,2,4,False,Âme errante,False,,,5,0,0
+78,2157,3,combat,2,2,False,Spectre,False,,,3,0,0
+78,2391,3,combat,2,0,True,Âme errante,False,,,1,0,0
+3,273,1,combat,2,4,False,Traqueur,False,,,4,0,0
+3,767,1,boss,1,5,False,une éruption tellurique,False,colosse,aftershock,1,20,0
+3,773,1,boss,2,3,False,Le Colosse d’Ossements,True,colosse,,1,1,0
+3,869,2,combat,1,2,False,un projectile ennemi,False,,,2,0,6
+3,972,2,combat,1,1,False,un projectile ennemi,False,,,4,0,3
+3,1052,2,combat,1,0,True,un projectile ennemi,False,,,0,0,3
+7,1076,2,scelle,2,6,False,Traqueur,False,,,5,2,0
+7,2309,3,combat,1,11,False,un projectile ennemi,False,,,2,0,1
+7,4202,4,boss,2,10,False,un projectile ennemi,False,gorgone,rockRain,1,3,7
+7,4333,5,combat,1,9,False,un projectile ennemi,False,,,1,2,16
+7,4426,5,combat,2,8,False,Écho d’âme,False,,,6,0,2
+7,4543,5,combat,1,7,False,un projectile ennemi,False,,,6,0,6
+7,4573,5,combat,1,6,False,un projectile ennemi,False,,,3,2,14
+7,4601,5,combat,1,7,False,un projectile ennemi,False,,,0,0,1
+7,5071,5,boss,2,12,False,un projectile ennemi,False,eclipse,,2,0,5
+7,5090,5,boss,2,10,False,un projectile ennemi,False,eclipse,sweepBeam,1,0,16
+7,5214,5,boss,2,8,False,un projectile ennemi,False,eclipse,blinkAway,1,0,6
+7,5548,5,boss,2,6,False,un projectile ennemi,False,eclipse,spiralBurst,1,2,14
+11,1080,2,combat,1,5,False,un projectile ennemi,False,,,3,0,9
+11,1188,2,combat,1,4,False,un projectile ennemi,False,,,1,0,3
+11,1997,2,boss,1,5,False,un projectile ennemi,False,tisseuse,spiralBurst,1,0,8
+11,2130,3,combat,1,4,False,Âme errante,False,,,7,3,0
+11,2172,3,combat,2,2,False,Âme errante,False,,,1,3,0
+11,2517,3,combat,2,3,False,Âme errante,False,,,7,3,0
+11,2972,3,boss,3,5,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+11,3182,3,boss,3,2,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+11,3288,3,boss,2,0,True,un projectile ennemi,False,pyroclaste,spiralBurst,1,0,16
+15,554,1,boss,2,6,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+15,559,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+15,754,2,combat,1,5,False,Grimoire déchaîné,False,,,2,0,5
+15,1051,2,combat,1,5,False,un projectile ennemi,False,,,1,0,5
+15,1204,2,combat,1,4,False,Grimoire déchaîné,False,,,5,0,0
+15,1465,2,miniboss,1,4,False,Âme errante,False,,,4,0,0
+15,1630,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,0,7
+15,1691,2,boss,1,4,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,4
+15,1715,2,boss,1,3,False,un projectile ennemi,False,tisseuse,,1,0,7
+15,2154,2,boss,1,2,False,un projectile ennemi,False,tisseuse,spiralBurst,1,0,7
+15,2752,3,combat,2,2,False,Âme errante,False,,,2,0,1
+15,2948,3,combat,1,1,False,un projectile ennemi,False,,,1,0,1
+15,3141,3,miniboss,1,7,False,un projectile ennemi,False,,,2,0,1
+15,3311,3,combat,1,8,False,Âme errante,False,,,12,0,2
+15,3317,3,combat,1,7,False,Âme errante,False,,,12,0,2
+15,3396,3,combat,1,6,False,un projectile ennemi,False,,,3,0,1
+15,3749,3,boss,2,4,False,un projectile ennemi,False,zenith,blinkAway,1,0,2
+15,3892,3,boss,2,2,False,un projectile ennemi,False,zenith,,1,1,16
+15,5535,4,combat,2,10,False,un projectile ennemi,False,,,0,0,1
+15,5848,4,boss,2,9,False,un projectile ennemi,False,roigivre,,2,0,16
+15,6530,5,combat,1,9,False,un projectile ennemi,False,,,1,0,16
+15,6673,5,boss,2,8,False,un projectile ennemi,False,eclipse,,2,0,16
+15,6756,5,boss,2,7,False,un projectile ennemi,False,eclipse,summonWave,1,0,10
+15,6836,5,boss,2,5,False,une éruption tellurique,False,eclipse,doubleRing,1,7,0
+19,1521,2,altar,2,10,False,,False,,,0,0,0
+19,1815,2,boss,1,9,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,4
+19,1867,2,boss,1,8,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,4
+19,1892,2,boss,1,7,False,un projectile ennemi,False,tisseuse,spiralBurst,1,0,5
+19,1921,2,boss,1,6,False,un projectile ennemi,False,,,0,4,4
+19,2199,3,combat,4,5,False,Cœur de brasier (élite glaciale),False,,,2,1,1
+19,2206,3,combat,4,1,False,Cœur de brasier (élite glaciale),False,,,2,3,0
+19,2512,3,combat,3,2,False,Spectre (élite explosive),False,,,8,3,0
+19,3390,3,boss,3,6,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+19,3544,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,7,0
+19,3911,4,combat,3,3,False,Noyé,False,,,9,0,1
+19,3922,4,combat,2,1,False,Âme errante,False,,,8,0,1
+19,3929,4,combat,1,0,True,Golem sépulcral,False,,,7,0,0
+23,668,1,boss,1,5,False,une éruption tellurique,False,sylve,,1,7,0
+23,809,2,combat,1,6,False,Âme errante,False,,,4,0,0
+23,1389,2,miniboss,3,5,False,Golem sépulcral (élite explosive),False,,,2,0,0
+23,1394,2,miniboss,3,2,False,Golem sépulcral (élite explosive),False,,,2,0,0
+23,1684,2,boss,1,3,False,un projectile ennemi,False,zenith,,1,0,13
+23,1924,2,boss,1,2,False,un projectile ennemi,False,zenith,spiralBurst,1,0,16
+23,1969,2,boss,1,1,False,un projectile ennemi,False,zenith,sweepBeam,1,0,16
+23,2434,3,combat,3,1,False,Golem sépulcral,False,,,2,0,1
+23,2614,3,combat,1,0,True,Traqueur,False,,,9,0,0
+27,654,1,boss,1,7,False,une éruption tellurique,False,colosse,aftershock,1,20,0
+27,660,1,boss,2,5,False,Le Colosse d’Ossements,True,colosse,,1,1,0
+27,681,1,boss,2,3,False,Le Colosse d’Ossements,True,colosse,,1,0,0
+27,686,1,boss,2,1,False,Le Colosse d’Ossements,True,colosse,slamQuake,1,0,0
+27,792,2,combat,1,0,True,un projectile ennemi,False,,,2,0,4
+31,599,1,boss,1,5,False,un projectile ennemi,False,sylve,summonWave,1,0,5
+31,2004,3,altar,2,6,False,un projectile ennemi,False,,,0,0,0
+31,2365,3,boss,2,4,False,un projectile ennemi,False,,,0,0,16
+31,3097,4,combat,1,7,False,Revenant brisé,False,,,5,0,0
+31,3321,4,altar,6,2,False,Revenant brisé,False,,,0,0,0
+31,3870,5,combat,1,1,False,un projectile ennemi,False,,,5,0,16
+31,3877,5,combat,1,0,True,un projectile ennemi,False,,,3,0,16
+35,571,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+35,1370,2,combat,1,5,False,un projectile ennemi,False,,,2,0,8
+35,1389,2,combat,1,4,False,un projectile ennemi,False,,,0,0,6
+35,1515,2,miniboss,3,1,False,Golem sépulcral (élite spectrale),False,,,1,0,0
+35,1520,2,miniboss,1,0,True,Golem sépulcral (élite spectrale),False,,,1,0,0
+39,583,1,boss,1,7,False,un projectile ennemi,False,sylve,brambleRing,1,0,5
+39,1048,2,altar,2,8,False,un projectile ennemi,False,,,0,0,0
+39,1119,2,miniboss,3,5,False,Golem sépulcral (élite glaciale),False,,,3,0,0
+39,1484,2,boss,1,7,False,une éruption tellurique,False,colosse,,1,12,0
+39,1516,2,boss,2,5,False,Le Colosse d’Ossements,True,colosse,,1,5,0
+39,1535,2,boss,1,4,False,une éruption tellurique,False,colosse,aftershock,1,19,0
+39,1540,2,boss,2,2,False,Le Colosse d’Ossements,True,colosse,,1,12,0
+39,1545,2,boss,2,0,True,Le Colosse d’Ossements,True,colosse,,1,0,0
+43,146,1,combat,1,5,False,Ossement fébrile,False,,,3,0,0
+43,921,2,combat,2,4,False,Âme errante (élite spectrale),False,,,3,0,0
+43,1236,2,combat,1,5,False,un projectile ennemi,False,,,1,0,2
+43,1464,2,combat,2,4,False,Grimoire déchaîné (élite spectrale),False,,,4,0,1
+43,1477,2,combat,1,3,False,Grimoire déchaîné,False,,,4,0,0
+43,1517,2,combat,1,2,False,un projectile ennemi,False,,,1,0,6
+43,1531,2,combat,1,1,False,un projectile ennemi,False,,,0,0,5
+43,1927,2,boss,1,5,False,un projectile ennemi,False,tisseuse,spiralBurst,1,0,9
+43,2237,3,combat,4,2,False,Golem sépulcral (élite explosive),False,,,3,0,1
+43,2298,3,combat,1,1,False,un projectile ennemi,False,,,1,0,1
+43,2483,3,miniboss,1,3,False,un projectile ennemi,False,,,1,0,1
+43,2705,3,combat,2,4,False,Spectre,False,,,5,0,0
+43,3210,4,combat,2,4,False,un projectile ennemi,False,,,4,0,2
+43,3406,4,combat,1,5,False,Âme errante,False,,,8,0,3
+47,240,1,miniboss,1,5,False,Âme errante,False,,,4,0,0
+47,572,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+47,829,2,combat,1,3,False,Grimoire déchaîné,False,,,5,0,2
+47,834,2,combat,1,2,False,Grimoire déchaîné,False,,,5,0,2
+47,865,2,combat,1,1,False,Grimoire déchaîné,False,,,5,0,0
+47,1436,2,combat,1,4,False,Grimoire déchaîné,False,,,5,0,0
+47,1459,2,combat,1,3,False,Grimoire déchaîné,False,,,5,0,0
+47,1497,2,combat,1,2,False,un projectile ennemi,False,,,0,0,14
+47,1589,2,combat,1,1,False,un projectile ennemi,False,,,0,0,8
+47,2087,2,boss,1,2,False,un projectile ennemi,False,tisseuse,,1,0,10
+47,2460,2,boss,1,1,False,un projectile ennemi,False,,,0,0,7
+47,2851,3,combat,3,2,False,Cœur de brasier,False,,,6,1,1
+47,2855,3,combat,2,0,True,Traqueur,False,,,6,0,1
+51,630,2,combat,1,9,False,Grimoire déchaîné,False,,,3,0,3
+51,676,2,combat,1,8,False,Grimoire déchaîné,False,,,1,0,6
+51,781,2,combat,1,8,False,un projectile ennemi,False,,,0,0,6
+51,995,2,altar,2,8,False,un projectile ennemi,False,,,0,0,0
+51,1349,2,miniboss,3,5,False,Golem sépulcral (élite spectrale),False,,,1,0,0
+51,1983,3,combat,2,6,False,Zéphyr avide,False,,,4,0,0
+51,2332,3,combat,3,5,False,Zéphyr avide (élite spectrale),False,,,3,0,0
+51,3797,4,combat,1,7,False,Revenant brisé,False,,,3,0,0
+51,4197,4,boss,2,6,False,un projectile ennemi,False,roigivre,doubleRing,2,0,16
+51,4263,4,boss,2,4,False,une éruption tellurique,False,roigivre,aftershock,2,20,0
+51,4281,4,boss,2,2,False,un projectile ennemi,False,roigivre,ringVolley,2,0,4
+51,4289,4,boss,2,0,True,un projectile ennemi,False,roigivre,,2,6,14
+55,704,1,boss,1,5,False,une éruption tellurique,False,colosse,,1,13,0
+55,1661,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,0,8
+55,2212,3,combat,3,2,False,Zéphyr avide,False,,,8,0,0
+55,2217,3,combat,1,1,False,Âme errante,False,,,8,0,0
+55,3045,3,boss,3,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+55,3069,3,boss,3,1,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+55,3252,4,combat,1,0,True,Spectre,False,,,8,0,0
+59,352,1,miniboss,1,5,False,Âme errante,False,,,2,0,0
+59,1114,2,combat,1,5,False,un projectile ennemi,False,,,1,0,6
+59,2311,3,combat,2,4,False,Escarbille,False,,,6,3,0
+59,2839,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+59,3734,4,combat,3,3,False,Âme errante (élite glaciale),False,,,8,0,0
+59,3821,4,combat,2,3,False,Traqueur,False,,,5,0,0
+59,3853,4,combat,2,1,False,Traqueur,False,,,4,0,0
+59,3859,4,combat,1,0,True,Traqueur,False,,,4,0,0
+63,558,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+63,708,2,combat,1,3,False,un projectile ennemi,False,,,0,0,8
+63,829,2,combat,1,2,False,un projectile ennemi,False,,,1,0,4
+63,1139,2,combat,1,3,False,Grimoire déchaîné,False,,,3,0,0
+63,2007,3,combat,2,4,False,Cendre instable,False,,,7,3,0
+63,2799,3,boss,2,4,False,une éruption tellurique,False,colosse,,1,14,0
+63,2804,3,boss,3,1,False,Le Colosse d’Ossements,True,colosse,,1,2,0
+63,2809,3,boss,1,0,True,Le Colosse d’Ossements,True,colosse,slamQuake,1,0,0
+67,788,2,scelle,1,5,False,un projectile ennemi,False,,,2,5,4
+67,2987,4,boss,2,4,False,une éruption tellurique,False,roigivre,,2,8,14
+67,3255,5,combat,1,5,False,une éruption tellurique,False,,,4,2,16
+67,3401,5,combat,1,5,False,un projectile ennemi,False,,,0,0,2
+67,3492,5,altar,1,6,False,un projectile ennemi,False,,,0,0,0
+67,3987,5,boss,2,4,False,un projectile ennemi,False,eclipse,,1,0,13
+67,4082,5,boss,2,2,False,une éruption tellurique,False,eclipse,mirrorEcho,1,8,0
+71,851,2,combat,1,5,False,un projectile ennemi,False,,,3,0,6
+71,951,2,combat,1,4,False,Âme errante,False,,,4,5,0
+71,1331,2,miniboss,3,3,False,Golem sépulcral (élite spectrale),False,,,1,5,0
+71,1336,2,miniboss,3,0,True,Golem sépulcral (élite spectrale),False,,,1,0,0
+75,614,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+75,621,1,boss,2,2,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+75,669,1,boss,2,0,True,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,2,0
+79,439,1,combat,1,5,False,Traqueur,False,,,5,0,0
+79,450,1,combat,1,4,False,Ossement fébrile,False,,,5,0,0
+79,1003,2,combat,1,5,False,Grimoire déchaîné,False,,,2,0,6
+79,1092,2,combat,2,3,False,Grimoire déchaîné (élite vampirique),False,,,4,0,3
+79,1126,2,combat,2,1,False,Grimoire déchaîné (élite vampirique),False,,,4,0,0
+79,1317,2,combat,1,1,False,un projectile ennemi,False,,,4,0,6
+79,1377,2,combat,1,0,True,un projectile ennemi,False,,,1,0,8
+4,631,1,boss,1,5,False,une éruption tellurique,False,colosse,,1,14,0
+4,829,2,altar,2,6,False,une éruption tellurique,False,,,0,0,0
+4,1445,2,boss,1,5,False,un projectile ennemi,False,tisseuse,fanVolley,1,2,6
+4,1492,2,boss,1,4,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,4,5
+4,1859,3,combat,2,4,False,Âme errante,False,,,3,0,0
+8,668,1,boss,1,5,False,un projectile ennemi,False,sylve,rockRain,1,0,5
+8,750,1,boss,1,4,False,un projectile ennemi,False,,,0,0,10
+8,958,2,combat,1,4,False,un projectile ennemi,False,,,0,0,7
+8,1040,2,combat,1,3,False,Grimoire déchaîné,False,,,4,0,1
+8,1320,2,combat,1,3,False,un projectile ennemi,False,,,1,0,9
+8,1408,2,combat,1,2,False,un projectile ennemi,False,,,4,0,4
+8,1417,2,combat,1,2,False,Âme errante,False,,,5,0,2
+8,1527,2,combat,1,1,False,un projectile ennemi,False,,,0,0,9
+8,1847,2,boss,1,4,False,un projectile ennemi,False,zenith,,1,0,16
+8,2304,3,combat,2,4,False,Âme errante,False,,,7,3,0
+8,2311,3,combat,2,2,False,Âme errante,False,,,7,4,0
+8,2319,3,combat,2,0,True,Chantre des ombres,False,,,7,0,1
+12,694,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,,1,0,0
+12,1106,2,combat,1,9,False,Grimoire déchaîné,False,,,1,0,4
+12,1146,2,altar,1,8,False,Grimoire déchaîné,False,,,0,0,0
+12,1396,2,combat,3,5,False,Traqueur (élite vampirique),False,,,5,0,4
+12,1409,2,combat,1,4,False,Traqueur,False,,,5,0,2
+12,1668,2,boss,1,4,False,un projectile ennemi,False,tisseuse,,1,0,5
+12,1822,2,boss,1,3,False,un projectile ennemi,False,tisseuse,summonWave,1,0,4
+12,1858,2,boss,1,2,False,un projectile ennemi,False,tisseuse,,1,0,16
+12,2346,3,combat,2,2,False,Zéphyr avide,False,,,8,0,0
+12,2353,3,combat,2,0,True,Zéphyr avide,False,,,8,0,0
+16,634,1,boss,1,5,False,un projectile ennemi,False,vorace,,1,0,8
+16,663,1,boss,2,3,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,2,0
+16,850,2,combat,1,3,False,Grimoire déchaîné,False,,,5,0,0
+16,892,2,combat,1,2,False,un projectile ennemi,False,,,0,0,16
+16,956,2,combat,2,2,False,Grimoire déchaîné (élite vampirique),False,,,6,0,0
+16,962,2,combat,1,1,False,Grimoire déchaîné,False,,,6,0,0
+16,1311,2,combat,1,5,False,un projectile ennemi,False,,,1,0,7
+16,2237,3,combat,4,4,False,Zéphyr avide (élite invocatrice),False,,,4,0,0
+16,2245,3,combat,2,2,False,Âme errante,False,,,3,0,0
+16,2601,3,combat,2,6,False,Âme errante,False,,,4,0,0
+16,2648,3,altar,1,6,False,Âme errante,False,,,0,0,0
+16,3189,3,boss,3,3,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+16,3444,4,combat,2,2,False,Spectre,False,,,3,0,0
+16,3514,4,combat,2,0,True,Âme errante (élite invocatrice),False,,,7,0,0
+20,288,1,combat,1,5,False,Exhumé,False,,,2,0,0
+20,880,2,combat,1,7,False,un projectile ennemi,False,,,1,0,10
+20,1285,2,miniboss,3,5,False,Golem sépulcral (élite spectrale),False,,,1,0,0
+20,1290,2,miniboss,3,2,False,Golem sépulcral (élite spectrale),False,,,1,0,0
+20,1484,2,combat,1,3,False,un projectile ennemi,False,,,1,0,5
+20,1645,2,scelle,1,4,False,Grimoire déchaîné,False,,,5,0,0
+20,1726,2,scelle,2,2,False,Grimoire déchaîné (élite explosive),False,,,2,0,3
+20,1786,2,scelle,2,0,True,Grimoire déchaîné (élite explosive),False,,,2,0,0
+24,246,1,combat,1,9,False,Exhumé,False,,,4,0,0
+24,251,1,combat,1,8,False,Exhumé,False,,,4,0,0
+24,646,1,boss,1,9,False,une éruption tellurique,False,,,0,14,0
+24,1628,2,boss,1,11,False,un projectile ennemi,False,tisseuse,,1,0,5
+24,1698,2,boss,1,10,False,un projectile ennemi,False,tisseuse,,1,0,5
+24,1904,2,boss,1,10,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,3,8
+24,2059,3,combat,2,8,False,Spectre,False,,,5,0,0
+24,2065,3,combat,3,5,False,Escarbille (élite vampirique),False,,,4,0,0
+24,2174,3,altar,2,8,False,Escarbille (élite vampirique),False,,,0,0,0
+24,2360,3,combat,4,4,False,Cœur de brasier (élite invocatrice),False,,,1,1,0
+24,2548,3,miniboss,4,2,False,Golem sépulcral (élite invocatrice),False,,,3,0,0
+24,2713,3,combat,2,4,False,Spectre,False,,,9,0,0
+24,3095,3,boss,2,4,False,un projectile ennemi,False,pyroclaste,,1,2,16
+24,3317,4,combat,2,6,False,Spectre,False,,,8,0,0
+24,3362,4,combat,2,5,False,Spectre,False,,,6,0,0
+24,3510,4,combat,2,5,False,Spectre,False,,,6,0,0
+24,3516,4,combat,3,2,False,Âme errante (élite invocatrice),False,,,6,0,1
+24,4485,4,boss,2,6,False,un projectile ennemi,False,gorgone,,1,0,16
+24,4813,5,combat,2,6,False,Âme errante,False,,,9,2,0
+24,4821,5,combat,2,4,False,Âme errante,False,,,9,0,0
+24,4828,5,combat,3,1,False,Âme errante (élite vampirique),False,,,8,0,0
+24,4963,5,combat,2,1,False,un projectile ennemi,False,,,5,0,2
+24,5665,5,boss,2,5,False,un projectile ennemi,False,eclipse,summonWave,1,0,11
+24,6070,5,boss,2,5,False,une éruption tellurique,False,eclipse,,1,2,16
+24,6225,5,boss,2,4,False,un projectile ennemi,False,eclipse,,2,0,16
+24,6352,5,boss,1,4,False,un projectile ennemi,False,eclipse,,1,5,10
+28,814,2,combat,1,5,False,un projectile ennemi,False,,,1,0,3
+28,958,2,combat,1,5,False,Traqueur,False,,,5,3,0
+28,1103,2,combat,1,5,False,Traqueur,False,,,7,0,0
+28,1599,2,boss,1,5,False,un projectile ennemi,False,tisseuse,summonWave,1,0,5
+28,1768,2,boss,1,4,False,un projectile ennemi,False,tisseuse,summonWave,1,0,9
+28,1867,2,boss,1,3,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,4,5
+28,1935,2,boss,1,2,False,un projectile ennemi,False,,,0,0,16
+28,2440,3,scelle,3,3,False,Âme errante (élite vampirique),False,,,5,0,0
+28,2468,3,scelle,3,0,True,Âme errante (élite invocatrice),False,,,6,3,0
+32,543,1,boss,1,5,False,une éruption tellurique,False,sylve,,1,8,0
+32,970,2,combat,1,5,False,un projectile ennemi,False,,,4,0,7
+32,1022,2,combat,1,5,False,un projectile ennemi,False,,,1,0,8
+32,1029,2,combat,1,4,False,un projectile ennemi,False,,,1,0,5
+32,1120,2,combat,1,3,False,un projectile ennemi,False,,,0,0,9
+32,1234,2,scelle,2,3,False,Traqueur (élite explosive),False,,,4,0,0
+32,1679,2,boss,1,5,False,un projectile ennemi,False,zenith,sweepBeam,1,0,16
+32,1745,2,boss,1,4,False,un projectile ennemi,False,zenith,,1,0,5
+32,1887,2,boss,1,3,False,un projectile ennemi,False,zenith,spiralBurst,1,0,7
+32,1927,2,boss,1,2,False,un projectile ennemi,False,zenith,,1,1,16
+32,2146,3,combat,2,2,False,Âme errante,False,,,6,0,0
+32,2263,3,combat,2,0,True,Traqueur (élite spectrale),False,,,7,0,0
+36,402,1,miniboss,2,4,False,Traqueur (élite explosive),False,,,1,0,0
+36,540,1,boss,1,5,False,une éruption tellurique,False,sylve,,1,7,0
+36,562,1,boss,1,4,False,un projectile ennemi,False,sylve,,1,0,5
+36,1112,2,combat,1,9,False,un projectile ennemi,False,,,3,0,6
+36,1597,2,combat,1,8,False,un projectile ennemi,False,,,1,0,7
+36,1798,2,altar,2,8,False,un projectile ennemi,False,,,0,0,0
+36,2187,2,boss,1,7,False,un projectile ennemi,False,zenith,,1,0,16
+36,2232,2,boss,1,6,False,un projectile ennemi,False,zenith,,1,0,16
+36,2581,3,combat,2,6,False,Spectre,False,,,2,0,0
+36,2639,3,altar,2,6,False,Spectre,False,,,0,0,0
+36,2786,3,combat,2,4,False,Âme errante,False,,,7,3,0
+36,2796,3,combat,2,2,False,Traqueur,False,,,5,1,0
+36,3106,3,combat,1,5,False,un projectile ennemi,False,,,5,4,1
+36,3137,3,combat,3,2,False,Cœur de brasier,False,,,2,0,1
+36,3577,3,boss,2,3,False,un projectile ennemi,False,,,0,0,8
+36,3648,4,combat,3,0,True,Âme errante (élite spectrale),False,,,8,0,0
+40,316,1,combat,1,5,False,Âme errante,False,,,6,1,0
+40,608,1,boss,1,5,False,un projectile ennemi,False,vorace,,1,0,15
+40,639,1,boss,2,3,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,2,0
+40,702,2,combat,2,2,False,Grimoire déchaîné (élite vampirique),False,,,3,0,3
+40,816,2,combat,1,2,False,Grimoire déchaîné,False,,,5,0,0
+40,1530,2,boss,1,6,False,un projectile ennemi,False,tisseuse,,1,4,5
+40,1677,3,combat,4,2,False,Zéphyr avide (élite invocatrice),False,,,5,0,0
+40,1701,3,combat,2,0,True,Zéphyr avide,False,,,3,0,0
+44,669,1,boss,1,5,False,une éruption tellurique,False,colosse,,1,12,0
+44,717,1,boss,1,4,False,une éruption tellurique,False,colosse,aftershock,1,20,0
+44,1514,2,combat,1,5,False,un projectile ennemi,False,,,4,0,2
+44,2841,3,combat,2,4,False,Chantre des ombres,False,,,6,0,0
+44,2877,3,combat,2,2,False,Âme errante,False,,,9,0,2
+44,3360,3,boss,2,2,False,un projectile ennemi,False,vorace,,1,0,16
+44,3723,4,combat,2,0,True,Golem sépulcral,False,,,4,0,1
+48,840,1,boss,2,6,False,Le Colosse d’Ossements,True,colosse,,1,5,0
+48,848,1,boss,1,5,False,une éruption tellurique,False,colosse,slamQuake,1,0,0
+48,1050,2,combat,1,6,False,Grimoire déchaîné,False,,,6,0,0
+48,1057,2,combat,1,5,False,Grimoire déchaîné,False,,,6,0,0
+48,1419,2,combat,1,5,False,Âme errante,False,,,2,0,0
+48,1707,2,boss,1,7,False,un projectile ennemi,False,zenith,sweepBeam,1,0,16
+48,1839,2,boss,1,6,False,un projectile ennemi,False,zenith,ringVolley,1,0,15
+48,1946,2,boss,1,5,False,un projectile ennemi,False,zenith,,1,0,16
+48,2027,2,boss,1,4,False,un projectile ennemi,False,zenith,sweepBeam,1,0,12
+48,2045,2,boss,1,3,False,un projectile ennemi,False,zenith,blinkAway,1,1,11
+48,2214,3,combat,1,4,False,un projectile ennemi,False,,,1,0,1
+48,2272,3,combat,2,2,False,Escarbille,False,,,6,1,0
+48,2289,3,combat,2,0,True,Âme errante (élite vampirique),False,,,5,0,0
+52,1112,2,combat,1,7,False,Grimoire déchaîné,False,,,7,0,1
+52,1795,2,boss,1,7,False,un projectile ennemi,False,tisseuse,summonWave,1,0,5
+52,1949,2,boss,1,6,False,un projectile ennemi,False,tisseuse,summonWave,1,0,5
+52,2103,2,boss,1,5,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,11
+52,2499,3,altar,1,6,False,un projectile ennemi,False,,,0,0,0
+52,3069,3,combat,4,2,False,Cœur de brasier (élite spectrale),False,,,4,4,2
+52,3082,3,combat,2,0,True,Cœur de brasier (élite spectrale),False,,,4,2,1
+56,174,1,combat,1,5,False,une éruption tellurique,False,,,0,1,0
+56,902,2,combat,1,5,False,un projectile ennemi,False,,,1,0,2
+56,1239,2,miniboss,3,3,False,Golem sépulcral (élite vampirique),False,,,1,0,0
+56,1244,2,miniboss,3,0,True,Golem sépulcral (élite vampirique),False,,,1,0,0
+60,689,1,boss,1,7,False,une éruption tellurique,False,sylve,,1,2,0
+60,777,1,boss,1,6,False,un projectile ennemi,False,,,0,0,16
+60,944,2,combat,1,5,False,Grimoire déchaîné,False,,,4,0,3
+60,980,2,combat,1,4,False,un projectile ennemi,False,,,0,0,13
+60,1078,2,combat,1,3,False,un projectile ennemi,False,,,3,0,2
+60,1209,2,combat,1,3,False,un projectile ennemi,False,,,3,0,6
+60,1289,2,combat,1,2,False,un projectile ennemi,False,,,2,0,9
+60,1385,2,combat,1,1,False,un projectile ennemi,False,,,1,0,8
+60,1497,2,miniboss,2,0,True,Golem sépulcral (élite explosive),False,,,3,0,0
+64,226,1,combat,2,4,False,Ronce rampante (élite explosive),False,,,2,1,0
+64,1589,2,boss,1,5,False,un projectile ennemi,False,tisseuse,spiralBurst,1,0,16
+64,1674,2,boss,1,4,False,un projectile ennemi,False,,,0,4,15
+64,1767,3,combat,4,0,True,Zéphyr avide (élite vampirique),False,,,5,0,0
+68,585,1,boss,1,5,False,une éruption tellurique,False,,,0,14,0
+68,896,2,combat,1,4,False,un projectile ennemi,False,,,1,5,3
+68,1360,2,boss,1,5,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,5
+68,1909,3,combat,1,4,False,un projectile ennemi,False,,,1,0,1
+68,2008,3,combat,2,3,False,Spectre,False,,,7,3,0
+68,2131,3,combat,1,2,False,un projectile ennemi,False,,,3,0,2
+68,2806,3,miniboss,1,4,False,une éruption tellurique,False,,,1,3,0
+68,2883,3,miniboss,1,3,False,une éruption tellurique,False,,,1,3,0
+68,3016,3,combat,1,5,False,une éruption tellurique,False,,,3,4,0
+68,3030,3,combat,3,2,False,Cœur de brasier,False,,,2,0,0
+68,3720,4,combat,2,2,False,un projectile ennemi,False,,,2,0,2
+68,3919,4,combat,3,1,False,Spectre (élite spectrale),False,,,5,0,0
+68,4156,4,combat,4,2,False,Noyé (élite spectrale),False,,,5,0,0
+68,4533,4,combat,2,5,False,Spectre,False,,,3,0,0
+68,4892,4,boss,2,6,False,un projectile ennemi,False,miroir,,2,0,16
+68,4925,4,boss,2,4,False,un projectile ennemi,False,gorgone,tidalPulse,2,0,16
+68,4931,4,boss,2,2,False,un projectile ennemi,False,gorgone,tidalPulse,2,0,16
+68,4965,4,boss,2,0,True,un projectile ennemi,False,gorgone,tidalPulse,2,0,16
+72,573,1,boss,1,5,False,une éruption tellurique,False,colosse,slamQuake,1,2,0
+72,1446,2,boss,1,5,False,un projectile ennemi,False,tisseuse,summonWave,1,0,4
+72,2700,3,boss,2,4,False,un projectile ennemi,False,pyroclaste,spiralBurst,1,0,16
+72,2877,4,combat,2,2,False,un projectile ennemi,False,,,4,0,1
+72,3146,4,combat,3,3,False,Traqueur,False,,,9,0,0
+72,3202,4,combat,3,0,True,Traqueur,False,,,8,0,0
+76,565,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,tripleLunge,1,0,0
+76,1277,2,combat,1,5,False,un projectile ennemi,False,,,1,0,3
+76,1355,2,miniboss,1,4,False,Âme errante,False,,,2,0,0
+76,1617,2,boss,1,5,False,un projectile ennemi,False,tisseuse,summonWave,1,0,5
+76,1847,2,boss,1,4,False,un projectile ennemi,False,tisseuse,spiralBurst,1,0,8
+76,2019,2,boss,1,3,False,un projectile ennemi,False,,,0,0,11
+76,2341,3,combat,3,2,False,Âme errante (élite invocatrice),False,,,6,0,1
+76,2459,3,combat,1,2,False,un projectile ennemi,False,,,1,0,1
+76,2527,3,combat,2,0,True,Zéphyr avide,False,,,6,0,0
+80,980,2,combat,1,9,False,un projectile ennemi,False,,,2,0,4
+80,1670,2,boss,1,9,False,un projectile ennemi,False,tisseuse,mirrorEcho,1,0,11
+80,1820,2,boss,1,8,False,un projectile ennemi,False,tisseuse,spiralBurst,1,4,10
+80,1900,2,boss,1,7,False,un projectile ennemi,False,tisseuse,spiralBurst,1,1,9
+80,2134,3,combat,3,6,False,Âme errante (élite vampirique),False,,,2,0,0
+80,2293,3,miniboss,1,7,False,une éruption tellurique,False,,,0,1,0
+80,2584,3,combat,2,8,False,Œil de braise,False,,,7,0,0
+80,2598,3,combat,1,7,False,une éruption tellurique,False,,,6,5,1
+80,2837,3,altar,2,8,False,une éruption tellurique,False,,,0,0,0
+80,2957,3,combat,1,7,False,une éruption tellurique,False,,,4,1,0
+80,3239,3,combat,1,6,False,un projectile ennemi,False,,,1,0,1
+80,3754,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,2,0
+80,4103,3,boss,2,1,False,un projectile ennemi,False,pyroclaste,,1,0,16
+80,4241,4,combat,1,0,True,Spectre,False,,,7,0,0

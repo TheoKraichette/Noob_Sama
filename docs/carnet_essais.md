@@ -697,6 +697,175 @@ Sur le protocole historique de 20 episodes il marque **242.42**, contre
 181.42 pour le champion de la phase 3, avec 169 salles au lieu de 137 et
 aucun episode fige.
 
+## Phase 5 - viser juste, esquiver vraiment, finir la run
+
+Le point de depart est l'audit de 40 episodes du professeur de la phase 4
+(`reports/death_audit_v44_life.csv`), lu autrement : sur 420 PV perdus,
+**47 %% le sont au corps a corps pur** (aucun projectile, aucune zone a
+l'ecran) et **164 PV le sont avec un seul ennemi present**. Le deuxieme
+tueur du jeu est l'Ame errante, l'ennemi le plus lent du bestiaire (125 px/s
+contre 290 pour le heros). Le dernier coup d'une run tombe au step median
+~1 900 sur un budget de 9 000 : les runs meurent tot, le budget est inutilise.
+
+La cause n'est pas l'esquive mais la visee. Le clavier tire sur huit rayons,
+donc seuls 41 %% des tirs pouvaient toucher (V37-V39), et les regles font
+marcher le heros autour de sa cible pour l'aligner sur un rayon : il se
+rapproche, tue deux fois moins vite, et se fait toucher par des ennemis
+qu'il devrait tenir a distance sans effort.
+
+Trois choses changent avant le premier essai.
+
+1. **Les regles du jeu sont lues a la source.** Le jeu est public et son
+   code l'est aussi (`js/data/enemies.js`, `js/game/boss.js`,
+   `js/data/items.js`, `js/data/difficulty.js`, version 4.1.0 - celle que
+   sert itch). Vitesses, rayons, duree de chaque telegraphe, effets de
+   chaque relique : plus une constante du professeur n'est devinee. Le jeu
+   joue toujours la version itch ; le code ne sert qu'a lire les regles.
+2. **La visee passe par la souris.** `js/core/input.js` offre une visee a
+   360 degres au clic gauche, entree officielle pour tout joueur. L'env la
+   pilote en turbo (`step(action, aim)`), le clavier gardant la priorite
+   comme dans le jeu. Les 96 actions et la baseline aleatoire a 14 actions
+   ne bougent pas : le score, le budget et la baseline sont ceux des phases
+   precedentes.
+3. **La mesure devient appariee.** `SEED_SETUP_JS` remplace `Math.random`
+   du jeu par un generateur seede : deux episodes de meme seed avec la
+   meme politique sont identiques (verifie sur 971 steps, jusqu'a la mort).
+   Les essais se jouent donc sur **80 donjons apparies** (`--seed 1000`),
+   et `compare_paired.py` mesure la difference donjon par donjon.
+   L'audit compte enfin le coup fatal (il s'arretait a l'etat `play`, donc
+   un coup avant chaque mort) et imprime les **PV perdus par salle pooles**
+   (somme des PV sur somme des salles) avec un intervalle a 95 %% par
+   bootstrap sur les episodes. Une politique est adoptee si cet intervalle
+   exclut zero et si les salles par episode ne reculent pas.
+
+Ce qui est appris et ce qui ne l'est pas sera nomme clairement : le reseau
+apprend le pilotage (deplacement, dash, competence, interaction) ; la visee
+et l'inventaire sont deux reflexes explicites, partages avec le professeur,
+et le README donnera l'ablation reseau seul / agent complet / professeur.
+
+### V45 - le point zero : 80 donjons apparies, le coup fatal compte
+
+Le professeur de la phase 4 et le clone retenu (`bc_agent_v6`, dont les
+trois features de valeur d'objet ajoutees apres son entrainement sont
+neutralisees par des poids nuls) sont mesures sur les seeds 1000 a 1079.
+
+| Politique | Score | Salles | Etages | PV / salle [IC 95 %%] | Etage atteint 1:2:3:4:5 | Victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Professeur ph. 4 | 358.81 +/- 23.85 | 978 | 112 | **1.032** [0.963, 1.108] | 8:45:17:7:3 | 2/80 |
+| Clone v6 | 249.49 +/- 11.86 | 711 | 75 | **1.049** [0.996, 1.106] | 12:62:5:1:0 | 0/80 |
+
+Avec le coup fatal, le professeur passe de 0.84 a 1.03 PV par salle : le
+chiffre de la phase 4 sous-estimait chaque mort d'un demi-coeur a un coeur.
+Ses 1 009 PV se repartissent ainsi : projectiles 325, Ame errante 113,
+Vorace 102, eruptions 63, Grimoire dechaine 57 ; parmi les attaques de
+gardien, `tripleLunge` 52, `heavyCharge` 47, `mirrorEcho` 37. Le clone
+meurt plus tot (62 runs sur 80 s'arretent a l'etage 2) et perd ses PV aux
+memes ennemis. Tout ce qui suit se compare a cette ligne.
+
+### V46 - la visee a la souris
+
+Une seule chose change : quand une regle tire, l'orbe part a la souris vers
+l'ennemi le plus proche, au lieu du rayon clavier le plus proche de lui.
+Aucune anticipation, aucun changement de cible ni de deplacement - les
+regles marchent encore autour de leur cible pour « s'aligner », ce qui ne
+sert plus a rien.
+
+| Politique | Score | Salles / ep. | Etages / ep. | PV / salle [IC 95 %%] | Etage atteint 1:2:3:4:5 | Victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| V45 professeur ph. 4 | 358.81 | 12.2 | 1.40 | 1.032 [0.963, 1.108] | 8:45:17:7:3 | 2/80 |
+| **V46 souris** | **552.42** | **18.4** | **2.24** | **0.836 [0.758, 0.917]** | 2:17:32:18:11 | **7/80** |
+
+Difference appariee sur les 80 donjons : +193.6 points (erreur type 37.9),
++6.2 salles, +0.84 etage par episode ; les PV par salle baissent de 0.196,
+intervalle [-0.305, -0.093]. Le candidat marque plus sur 58 donjons sur 80.
+**Adopte.** Les PV perdus par run montent pourtant (12.6 -> 15.4) parce que
+les runs vont plus loin : 733 PV sont perdus aux etages 3 a 5 contre 263
+avant, la ou le contact coute un coeur. La repartition par tueur change de
+nature : les projectiles passent de 32 %% a 36 %% des PV, l'Ame errante tombe
+de 113 a 85, et les gardiens profonds apparaissent (`magmaWake` 38,
+`tidalPulse` 16, `sweepBeam` 11). Quatre runs se figent dans une salle
+nettoyee (deux au point zero) : la salle est vide, les portes ouvertes, le
+heros bouge sans sortir - un defaut de navigation, deja present, que la
+duree de survie expose davantage.
+
+### V47 a V49 - trois essais neutres, et un blocage enfin compris
+
+Les trois essais suivants s'appuient sur le meme protocole (80 donjons
+apparies, difference mesuree donjon par donjon) :
+
+| Essai | Score | Salles / ep. | PV / salle [IC 95 %%] | Victoires | Figees | Verdict |
+| --- | --- | --- | --- | --- | --- | --- |
+| V46 souris | 552.42 | 18.4 | 0.836 [0.758, 0.917] | 7/80 | 4 | reference |
+| V47 zone morte 24 -> 6 px pres d'une cible | 541.87 | 18.0 | 0.861 [0.794, 0.934] | 6/80 | 5 | neutre (diff +0.025, IC [-0.073, +0.125]) |
+| V48 anticipation du tir (lead amorti) | 559.13 | 18.6 | 0.832 [0.770, 0.892] | 5/80 | 4 | neutre (diff -0.029, IC [-0.115, +0.048]) |
+| V49 priorite de cible | 515.06 | 17.2 | 0.864 [0.794, 0.938] | 5/80 | 1 | neutre (diff +0.032), -1.5 salle / ep. |
+
+**V47** visait les runs figees de V46 : le heros tournait autour d'une
+piece d'or a 36 px sans la ramasser. Reduire la zone morte de
+`_move_from_delta` a repare les quatre seeds observes... et cinq autres
+runs se sont figees ailleurs. La vraie cause est apparue en instrumentant
+la salle : la piece est aimantee vers le heros a ~220 px/s au maximum
+(`pickup.js`, acceleration 900 px/s2 amortie), et le heros court a
+290 px/s. Il depasse la piece a chaque pas, elle reste 36 px derriere lui,
+et le rayon de ramassage est de 28 px. S'arreter la ramasse en un
+demi-seconde. La regle `_collect` attend donc l'aimant sous 100 px ; les
+six seeds figes des trois audits jouent maintenant jusqu'au bout. Cette
+correction est entree dans V50.
+
+**V48**, l'anticipation du tir, resolue exactement cette fois (temps
+d'interception d'un orbe a 580 px/s vers un point mobile, composante
+laterale amortie selon la famille, plafond 0,6 s, aucune anticipation sur
+un ennemi qui freine), ne change rien de mesurable. La visee a 360 degres
+touchait deja ; le gain restant est dans le deplacement, pas dans l'angle.
+
+**V49**, choisir la cible par ce qu'elle coute (invocateurs, bombes avant
+armement, tireurs en preparation) plutot que par la distance, coute une
+salle et demie par run : tirer sur un chuchoteur a 300 px laisse l'ame
+errante a 100 px arriver au contact. La priorite reste disponible en
+option (`teacher:priority`) mais n'est pas retenue telle quelle.
+
+### V50 - le deplacement prédictif : la run se finit
+
+Les regles de deplacement du clavier (`_best_direction` sur un champ de
+danger, `_shot_dodge` sur le seul projectile le plus proche,
+`_hazard_escape` radial) sont remplacees par une simulation
+(`src/mover.py`) : les dix-sept deplacements que le clavier permet
+(immobile, huit marches, huit dashs) sont joues sur 0,6 s a 20 Hz contre
+ce que le jeu va faire dans ce laps de temps, tout etant lu dans son code -
+orbes en vol, zones qui eclatent a la fin de leur meche, chargeur qui a
+verrouille sa visee et va foncer sur cette droite (`enemy.js:329-336`),
+bombe amorcee, tireur en preparation dont l'orbe partira a 0,52 s,
+attaques de gardien annoncees (`boss.js` : eventail, anneaux, echo,
+reflets, onde de choc, balayage, sillage, repliques). Un candidat touche
+est elimine ; parmi les autres, le moins cher pour le combat gagne : bande
+de distance par famille d'ennemi (`src/bestiary.py`, lue dans
+`enemies.js` - un chargeur se tient a 240-350 px parce que sa charge fait
+170-218 px, un tireur a 300-440, une bombe au-dela de sa distance
+d'armement), ligne de vue, direction demandee, et un dash qui coute cinq
+points quand une marche suffit (V27). La securite est une contrainte,
+jamais un objectif : maximiser le degagement (V41-V42) envoyait le heros
+dans les coins. Le tir part a la souris a chaque pas, dashs compris.
+
+| Politique | Score | Salles / ep. | Etages / ep. | PV / salle [IC 95 %%] | Etage atteint 3:4:5 | Victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| V49 | 515.06 | 17.2 | 2.17 | 0.864 [0.794, 0.938] | 41:16:7 | 5/80 |
+| **V50 mover** | **992.23 +/- 15.87** | **32.2** | **3.84** | **0.211 [0.184, 0.239]** | 5:3:72 | **64/80** |
+
+Difference appariee : +477 points (erreur type 29), +15.1 salles, +1.66
+etage par episode, PV par salle -0.653, intervalle [-0.731, -0.576],
+meilleur sur 75 donjons sur 80. **Adopte.** 72 runs sur 80 atteignent
+l'etage 5, 64 le finissent ; les runs gagnantes perdent de 0 a 16 PV
+(mediane 6). Le niveau d'environ 0,2 PV par salle, calcule en phase 4
+comme celui qu'il faudrait pour finir regulierement, est atteint.
+
+Ce qui reste, lu dans le meme audit : 8 morts, presque toutes au sillage
+de magma (Pyroclaste 79 PV, Eclipse 55) et a la charge lourde de Vorace
+(51) ; et **8 runs figees** aux etages 3 a 5, budget epuise sans mourir -
+le prochain chantier. Les 80 PV attribues a « ? » ne sont pas des coups :
+c'est l'autel du sacrifice, qui retire un coeur de maximum et fait baisser
+la barre sans agresseur ; l'audit les ignore desormais (PV reels de V50
+apres correction : ~0,18 par salle).
+
 ## Limites connues
 
 - Les donjons ne sont pas seedables, donc les evaluations courtes restent

@@ -1,0 +1,244 @@
+episode,step,floor,room_type,lost,hp_left,fatal,killer,killer_was_boss,boss,boss_attack,enemies,hazards,shots
+1,2422,3,combat,2,6,False,Zéphyr avide,False,,,6,0,0
+1,2769,3,combat,1,7,False,Âme errante,False,,,5,0,0
+1,2775,3,combat,1,6,False,Âme errante,False,,,7,0,0
+1,3432,4,combat,2,10,False,un projectile ennemi,False,,,3,0,3
+1,5832,5,altar,2,10,False,un projectile ennemi,False,,,0,0,0
+1,6272,5,combat,2,8,False,Écho d’âme,False,,,4,0,0
+1,6908,5,boss,2,7,False,un projectile ennemi,False,eclipse,,1,0,14
+1,7023,5,boss,2,6,False,un projectile ennemi,False,eclipse,fanVolley,2,0,9
+1,7213,5,boss,2,4,False,un projectile ennemi,False,eclipse,blinkAway,1,2,10
+1,7615,5,boss,3,1,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,8,0
+1,7855,5,boss,1,0,True,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,4,8,0
+5,1946,3,combat,2,4,False,Âme errante,False,,,7,0,0
+5,3190,4,combat,3,3,False,Golem sépulcral,False,,,6,0,0
+5,3196,4,combat,2,1,False,Âme errante,False,,,9,0,0
+5,6601,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,5,0
+9,1035,2,combat,1,5,False,Grimoire déchaîné,False,,,7,0,1
+9,1044,2,combat,1,4,False,un projectile ennemi,False,,,5,0,9
+9,1689,2,boss,1,5,False,un projectile ennemi,False,zenith,,1,0,10
+9,3538,3,boss,3,3,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+13,2670,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,4,0
+13,2781,3,boss,3,0,True,Le Pyroclaste,True,pyroclaste,magmaWake,1,2,0
+17,1848,3,combat,3,3,False,Traqueur (élite glaciale),False,,,6,0,0
+21,2640,3,boss,3,3,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+25,684,2,altar,2,6,False,,False,,,0,0,0
+25,3513,4,combat,2,6,False,Âme errante,False,,,7,0,0
+25,3543,4,combat,1,5,False,Revenant brisé,False,,,6,0,0
+25,4806,5,combat,2,6,False,Écho d’âme,False,,,6,0,3
+25,5922,5,boss,3,5,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,,1,0,0
+29,2066,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,3,0
+29,2258,3,boss,3,0,True,Le Pyroclaste,True,pyroclaste,magmaWake,1,4,2
+33,391,1,treasure,2,4,False,,False,,,0,0,0
+33,1094,2,shop,2,2,False,,False,,,0,0,0
+33,3313,4,combat,3,1,False,Golem sépulcral,False,,,4,0,0
+37,3164,4,altar,2,14,False,,False,,,0,0,0
+37,3871,5,altar,2,14,False,,False,,,0,0,0
+37,4181,5,boss,2,12,False,un projectile ennemi,False,eclipse,summonWave,2,0,14
+41,529,1,boss,2,8,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+45,831,2,altar,2,6,False,,False,,,0,0,0
+49,950,2,altar,2,6,False,,False,,,0,0,0
+49,5329,5,combat,2,4,False,Écho d’âme,False,,,3,0,16
+53,463,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+53,2438,3,combat,3,3,False,Cœur de brasier,False,,,7,3,0
+57,513,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+57,6734,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,2,5,4
+61,1255,2,altar,2,6,False,,False,,,0,0,0
+61,4124,4,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,2,1,15
+65,3004,4,combat,4,2,False,Noyé (élite explosive),False,,,4,0,0
+65,4242,4,boss,3,3,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+65,4702,5,combat,2,4,False,Écho d’âme,False,,,9,0,2
+65,5590,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,7,6
+69,623,1,boss,2,6,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+69,1475,2,altar,2,6,False,"Vorace, Gueule de la Crypte",True,,,0,0,0
+69,3038,4,shop,2,4,False,"Vorace, Gueule de la Crypte",True,,,0,0,0
+73,1237,2,scelle,1,5,False,un projectile ennemi,False,,,4,0,6
+73,2870,3,boss,3,5,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+73,4002,4,altar,2,8,False,"Vorace, Gueule de la Crypte",True,,,0,0,0
+73,4078,4,combat,2,6,False,Spectre,False,,,5,0,0
+73,4556,5,altar,2,6,False,Spectre,False,,,0,0,0
+77,3570,4,altar,2,8,False,,False,,,0,0,0
+2,3075,4,combat,2,4,False,Spectre,False,,,5,0,0
+2,4161,4,boss,2,4,False,un projectile ennemi,False,tisseuse,,2,0,9
+6,2906,3,boss,3,5,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,3,0
+6,2974,3,boss,3,2,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+6,3182,4,combat,3,0,True,Traqueur (élite invocatrice),False,,,4,0,0
+10,3281,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,2,0
+10,3468,3,boss,3,0,True,Le Pyroclaste,True,pyroclaste,magmaWake,1,2,0
+14,3445,4,altar,2,12,False,,False,,,0,0,0
+14,4805,5,altar,2,10,False,,False,,,0,0,0
+14,4951,5,boss,2,8,False,un projectile ennemi,False,eclipse,,1,0,16
+26,2676,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,2,0
+26,5766,5,altar,2,10,False,Le Pyroclaste,True,,,0,0,0
+30,479,1,boss,2,8,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+30,1154,2,altar,2,8,False,"Vorace, Gueule de la Crypte",True,,,0,0,0
+30,1609,2,scelle,1,7,False,un projectile ennemi,False,,,5,5,3
+30,4004,3,boss,3,5,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+30,4054,3,boss,3,2,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,3,0
+30,7816,4,boss,2,10,False,un projectile ennemi,False,gorgone,rockRain,2,3,16
+30,7932,5,altar,6,6,False,un projectile ennemi,False,,,0,0,0
+34,4565,5,altar,2,8,False,,False,,,0,0,0
+34,4619,5,combat,2,6,False,Âme errante,False,,,4,0,0
+38,2445,3,combat,2,4,False,Âme errante,False,,,3,0,0
+38,3595,4,altar,2,12,False,Âme errante,False,,,0,0,0
+38,6524,5,altar,2,10,False,Âme errante,False,,,0,0,0
+42,1393,2,altar,2,6,False,,False,,,0,0,0
+42,2176,3,combat,3,3,False,Cœur de brasier,False,,,5,0,0
+42,2722,3,boss,3,7,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+42,5108,5,boss,3,11,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,tripleLunge,3,2,0
+46,1173,2,altar,2,8,False,,False,,,0,0,0
+46,1776,3,combat,1,7,False,un projectile ennemi,False,,,5,0,2
+46,2557,3,boss,3,5,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+46,3801,4,boss,2,6,False,un projectile ennemi,False,gorgone,brambleRing,1,0,16
+46,4440,5,altar,2,6,False,un projectile ennemi,False,,,0,0,0
+50,1247,2,altar,2,6,False,,False,,,0,0,0
+50,2642,3,altar,2,6,False,,False,,,0,0,0
+50,3407,4,combat,3,5,False,Traqueur (élite glaciale),False,,,6,0,0
+50,5501,5,boss,3,7,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,4,0
+54,953,2,combat,1,7,False,Grimoire déchaîné,False,,,6,0,1
+54,3204,3,altar,2,10,False,Grimoire déchaîné,False,,,0,0,0
+54,5974,5,combat,2,8,False,Traqueur,False,,,9,0,0
+58,3235,3,boss,3,3,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+58,5643,5,boss,2,4,False,un projectile ennemi,False,eclipse,summonWave,1,0,14
+62,5141,5,scelle,2,14,False,Âme errante,False,,,2,2,0
+66,2618,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+66,3141,4,combat,3,3,False,Golem sépulcral,False,,,8,0,0
+66,3352,4,combat,2,4,False,Âme errante,False,,,5,0,0
+66,5328,5,boss,2,8,False,un projectile ennemi,False,eclipse,,1,0,6
+66,5771,5,boss,3,5,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,2,0
+70,2739,4,altar,2,12,False,,False,,,0,0,0
+70,4234,5,boss,2,12,False,un projectile ennemi,False,eclipse,,1,0,16
+74,2879,3,treasure,2,4,False,,False,,,0,0,0
+78,4566,4,combat,3,5,False,Spectre (élite explosive),False,,,5,0,0
+78,4577,4,combat,2,3,False,Spectre,False,,,10,0,0
+78,6451,5,boss,3,5,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,5,10
+3,2456,2,boss,1,5,False,un projectile ennemi,False,tisseuse,,1,4,16
+3,3810,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,3,0
+3,4394,4,combat,2,2,False,Œil de braise,False,,,2,0,0
+3,7098,5,altar,2,8,False,Œil de braise,False,,,0,0,0
+3,8396,5,boss,1,7,False,un projectile ennemi,False,eclipse,,1,0,9
+7,4649,5,altar,2,6,False,,False,,,0,0,0
+7,5158,5,boss,2,4,False,un projectile ennemi,False,eclipse,summonWave,1,0,11
+11,751,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,2
+11,848,1,boss,2,2,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+11,2058,2,boss,1,5,False,un projectile ennemi,False,zenith,,1,0,16
+11,6946,4,combat,2,4,False,Âme errante,False,,,8,0,0
+11,7337,4,combat,2,4,False,Âme errante,False,,,10,0,0
+11,7343,4,combat,2,2,False,Œil de braise,False,,,10,0,1
+15,1828,2,boss,2,6,False,,False,,,0,0,5
+15,3613,4,combat,2,4,False,Âme errante,False,,,8,0,0
+19,2333,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+19,3745,5,combat,2,4,False,Âme errante,False,,,5,0,0
+23,1712,2,altar,2,8,False,,False,,,0,0,0
+23,2706,3,combat,2,12,False,Âme errante,False,,,6,0,0
+23,4776,5,combat,2,14,False,Âme errante,False,,,5,0,6
+23,5506,5,boss,3,13,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,5,0
+23,5547,5,boss,3,10,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,5,4
+27,1035,2,altar,2,8,False,,False,,,0,0,0
+27,1757,3,altar,2,6,False,,False,,,0,0,0
+27,2737,4,altar,2,8,False,,False,,,0,0,0
+27,4523,5,altar,2,6,False,,False,,,0,0,0
+31,3829,4,combat,2,6,False,Âme errante,False,,,5,0,0
+31,4093,4,altar,1,6,False,Âme errante,False,,,0,0,0
+31,5007,4,boss,3,9,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,2,2,0
+31,5155,4,boss,1,8,False,"Vorace, Gueule de la Crypte",True,,,0,12,0
+31,5222,5,combat,1,11,False,un projectile ennemi,False,,,6,2,6
+31,5630,5,altar,2,10,False,un projectile ennemi,False,,,0,0,0
+35,4045,4,altar,2,6,False,,False,,,0,0,0
+35,4434,4,boss,2,4,False,un projectile ennemi,False,gorgone,brambleRing,2,7,16
+35,4859,5,combat,2,6,False,Écho d’âme,False,,,4,0,0
+39,3008,4,combat,2,6,False,Spectre,False,,,7,0,0
+39,4337,5,altar,2,10,False,Spectre,False,,,0,0,0
+43,2380,3,combat,2,8,False,Âme errante,False,,,4,0,0
+43,3097,3,boss,3,7,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,4,0
+43,4028,4,combat,2,10,False,Feu follet,False,,,3,0,0
+43,5584,5,altar,2,10,False,Feu follet,False,,,0,0,0
+43,5919,5,boss,2,8,False,un projectile ennemi,False,eclipse,sweepBeam,1,0,5
+43,6190,5,boss,3,5,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,6,0
+47,2808,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,6,0
+47,5367,5,combat,2,4,False,Écho d’âme,False,,,7,0,0
+47,6521,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,5,0
+51,498,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,2,0
+51,2895,4,combat,2,10,False,Âme errante,False,,,4,0,0
+51,2996,4,combat,3,8,False,Golem sépulcral,False,,,8,0,0
+51,4847,5,combat,2,10,False,Âme errante,False,,,4,0,0
+55,362,1,combat,1,9,False,Ossement fébrile,False,,,4,0,0
+55,1940,3,combat,3,10,False,Traqueur (élite explosive),False,,,7,0,0
+55,6283,4,boss,2,14,False,un projectile ennemi,False,miroir,,1,0,16
+59,261,1,miniboss,1,5,False,Âme errante,False,,,1,0,0
+59,3473,3,boss,3,5,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,7,0
+59,6892,5,boss,2,6,False,un projectile ennemi,False,eclipse,fanVolley,1,0,10
+63,2260,3,boss,3,5,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,3,0
+63,2371,3,boss,3,2,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,5,0
+63,4186,5,altar,2,6,False,Le Pyroclaste,True,,,0,0,0
+63,5250,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,8,0
+63,5454,5,boss,3,0,True,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,4,3
+67,734,2,combat,1,5,False,Âme errante,False,,,4,0,0
+67,4960,5,combat,2,4,False,Âme errante,False,,,4,0,0
+71,1651,3,combat,2,4,False,Âme errante,False,,,5,0,0
+71,2225,3,boss,2,4,False,un projectile ennemi,False,zenith,,1,0,10
+71,3764,5,combat,2,6,False,Âme errante,False,,,5,0,0
+71,4637,5,boss,3,5,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,7,0
+75,3810,4,altar,2,8,False,,False,,,0,0,0
+75,5257,5,combat,3,5,False,Écho d’âme (élite glaciale),False,,,3,2,16
+79,42,1,combat,1,5,False,Ossement fébrile,False,,,1,0,0
+79,242,1,miniboss,1,5,False,Âme errante,False,,,2,0,0
+79,547,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+79,3334,4,combat,2,4,False,Pleureuse,False,,,5,0,0
+79,4754,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,tripleLunge,1,2,0
+4,1824,3,combat,2,4,False,Âme errante,False,,,5,0,0
+4,3162,3,boss,3,3,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+4,3501,4,combat,1,4,False,Ombrelette,False,,,5,0,0
+4,5391,5,altar,2,8,False,Ombrelette,False,,,0,0,0
+4,5688,5,boss,2,6,False,un projectile ennemi,False,eclipse,,1,0,16
+8,3046,3,altar,2,10,False,,False,,,0,0,0
+8,4219,4,combat,2,8,False,Revenant gelé,False,,,5,0,0
+8,5093,5,altar,2,8,False,Revenant gelé,False,,,0,0,0
+12,2750,3,altar,2,6,False,,False,,,0,0,0
+12,5331,5,altar,2,6,False,,False,,,0,0,0
+16,2750,3,altar,2,8,False,,False,,,0,0,0
+16,4208,4,altar,2,6,False,,False,,,0,0,0
+16,5896,5,boss,2,4,False,un projectile ennemi,False,eclipse,fanVolley,1,0,6
+16,6319,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,6,0
+16,6443,5,boss,3,0,True,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,2,7,3
+20,4400,4,boss,2,4,False,un projectile ennemi,False,annonciateur,sweepBeam,2,0,16
+20,4450,4,boss,2,2,False,un projectile ennemi,False,gorgone,,2,0,16
+24,839,2,altar,2,6,False,,False,,,0,0,0
+24,4100,5,altar,2,6,False,,False,,,0,0,0
+28,675,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,2,0
+28,2667,3,shop,2,4,False,"Vorace, Gueule de la Crypte",True,,,0,0,0
+28,4481,4,altar,2,6,False,"Vorace, Gueule de la Crypte",True,,,0,0,0
+32,1584,2,altar,2,6,False,,False,,,0,0,0
+32,2255,3,treasure,4,2,False,,False,,,0,0,0
+36,1586,2,altar,2,6,False,,False,,,0,0,0
+36,3578,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,2,0
+40,2257,3,combat,2,4,False,Zéphyr avide,False,,,7,0,0
+44,2426,3,combat,2,6,False,Zéphyr avide,False,,,5,0,0
+44,2642,3,altar,2,6,False,Zéphyr avide,False,,,0,0,0
+44,5936,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,,1,0,0
+48,5987,5,boss,3,9,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,,2,2,3
+52,672,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,2,0
+52,2320,3,combat,3,5,False,Golem sépulcral,False,,,6,0,0
+52,5610,5,boss,2,8,False,un projectile ennemi,False,eclipse,summonWave,1,0,7
+52,5703,5,boss,2,6,False,un projectile ennemi,False,eclipse,,1,0,13
+52,6004,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,5,0
+56,2837,3,boss,3,3,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,4,0
+56,2897,3,boss,3,0,True,Le Pyroclaste,True,pyroclaste,magmaWake,1,2,0
+60,2118,3,combat,3,3,False,Escarbille (élite vampirique),False,,,4,0,0
+60,5382,5,altar,2,6,False,Escarbille (élite vampirique),False,,,0,0,0
+64,2763,3,combat,2,4,False,Zéphyr avide,False,,,6,0,0
+64,2987,3,boss,3,3,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+68,1231,2,altar,2,10,False,,False,,,0,0,0
+68,2043,3,altar,2,8,False,,False,,,0,0,0
+68,2662,3,boss,3,5,False,Le Pyroclaste,True,pyroclaste,magmaWake,1,3,0
+68,4669,4,boss,2,6,False,un projectile ennemi,False,annonciateur,,2,0,16
+68,4688,4,boss,2,4,False,un projectile ennemi,False,tisseuse,mirrorEcho,2,0,14
+68,5713,5,shop,2,6,False,un projectile ennemi,False,,,0,0,0
+68,6688,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,tripleLunge,1,1,0
+72,6831,5,boss,3,3,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,magmaWake,1,6,0
+76,6549,5,boss,2,6,False,un projectile ennemi,False,eclipse,summonWave,1,0,6
+80,578,1,boss,2,4,False,"Vorace, Gueule de la Crypte",True,vorace,heavyCharge,1,0,0
+80,4006,4,boss,2,4,False,un projectile ennemi,False,pyroclaste,spiralBurst,2,3,16
+80,4606,5,altar,2,6,False,un projectile ennemi,False,,,0,0,0
+80,5453,5,boss,2,4,False,un projectile ennemi,False,eclipse,summonWave,1,0,6
+80,6154,5,boss,3,1,False,"L’Éclipse, Dévoreuse d’Âmes",True,eclipse,,1,0,3
