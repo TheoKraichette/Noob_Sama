@@ -21,11 +21,7 @@ from src.eos_env import EclipseEnv
 from src.features import N_FEATURES, featurize
 
 
-DEFAULT_DEMOS = [
-    ROOT / "data" / "demos.npz",
-    ROOT / "data" / "dagger_a.npz",
-    ROOT / "data" / "dagger_b.npz",
-]
+DEFAULT_DEMOS = [ROOT / "data" / "demos.npz"]
 DEFAULT_OUTPUT = ROOT / "reports" / "training_dqfd.csv"
 DEFAULT_BEST = ROOT / "checkpoints" / "dqfd_best.json"
 
@@ -57,7 +53,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--agent", type=Path, default=ROOT / "models" / "bc_agent.json")
     parser.add_argument("--demos", type=Path, nargs="+", default=DEFAULT_DEMOS)
     parser.add_argument("--episodes", type=int, default=300)
-    parser.add_argument("--max-steps", type=int, default=900)
+    parser.add_argument("--max-steps", type=int, default=9000)
     parser.add_argument("--step-seconds", type=float, default=0.15)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--epsilon", type=float, default=0.05)
@@ -68,6 +64,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bc-batch", type=int, default=64)
     parser.add_argument("--buffer-size", type=int, default=200_000)
     parser.add_argument("--warmup-steps", type=int, default=3_000)
+    parser.add_argument("--train-every", type=int, default=4)
     parser.add_argument("--target-sync", type=int, default=2_000)
     parser.add_argument("--hp-penalty", type=float, default=1.0)
     parser.add_argument("--door-shaping", type=float, default=0.02)
@@ -111,10 +108,17 @@ def run_episode(env, agent, buffer, demos, args, *, greedy: bool, global_step: i
         if buffer is not None:
             buffer.add(features, agent.actions.index(action), reward, next_features, done)
             global_step += 1
-            if buffer.size >= args.warmup_steps:
+            # Standard DQN practice, and here a necessity: a gradient step on
+            # every transition costs more wall-clock than the simulation
+            # itself, which would put a full-budget run out of reach.
+            if buffer.size >= args.warmup_steps and global_step % args.train_every == 0:
                 td_losses.append(agent.train_step(buffer.sample(args.batch_size, agent.rng)))
                 idx = agent.rng.integers(0, len(demo_actions), size=args.bc_batch)
-                bc_losses.append(agent.train_step_bc(demo_states[idx], demo_actions[idx]))
+                bc_losses.append(
+                    agent.train_step_bc(
+                        demo_states[idx].astype(np.float32), demo_actions[idx]
+                    )
+                )
             if global_step % args.target_sync == 0:
                 agent.sync_target()
 
