@@ -405,6 +405,23 @@ def _count_features() -> int:
         "room_key": "1:0,0",
         "stuck_steps": 0,
         "room_steps": 0,
+        "fire_cd": 0.0,
+        "player_vx": 0.0,
+        "player_vy": 0.0,
+        "dash_t": 0.0,
+        "slow_t": 0.0,
+        "items": [],
+        "synergies": [],
+        "mods": {},
+        "second_wave": False,
+        "gambles_left": 3,
+        "defi_done": False,
+        "defi_active": False,
+        "defi_t": 0.0,
+        "in_transition": False,
+        "strata_zones": [],
+        "wind": None,
+        "shot_sectors": [0.0] * 16,
     }
     assert {f.name for f in fields(Observation)} == set(dummy_values)
     return len(featurize(Observation(**dummy_values)))

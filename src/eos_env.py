@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_playwright
@@ -161,6 +161,16 @@ ACTIONS: dict[str, list[str]] = {
 TERMINAL_STATES = {"gameover", "victory"}
 
 
+# The actions that leave the aim to the mouse channel of `step()`: every
+# entry that holds no arrow key. Movement, dash, interact and the hero skill
+# (twenty of them) are what a policy decides once aiming is a separate,
+# continuous input.
+MOVE_ACTIONS = [
+    name for name, codes in ACTIONS.items()
+    if not any(code.startswith("Arrow") for code in codes)
+]
+
+
 RANDOM_BASELINE_ACTIONS = [
     "noop",
     "up",
@@ -245,6 +255,30 @@ window.__eosObserve = () => {
                 vy: e.vy ?? 0,
                 distance: dist(e.x ?? 0, e.y ?? 0),
                 los: hasLineOfSight(e.x ?? 0, e.y ?? 0),
+                // What the game knows about this body and announces on
+                // screen: the elite's crown (affix), the glass guardian's
+                // shield and its facing, the spectral phase, how hard it
+                // hits, how far along its telegraph it is (stateT) and how
+                // long before its next attack (shootCd). A boss also
+                // carries the direction it locked for a charge (auxX/Y)
+                // and where its echo or reflection stands (aux2X/Y).
+                affix: e.affix?.id || null,
+                ghosting: !!e.ghosting,
+                front_shield: !!e.type?.frontShield,
+                shield_dir: [e.auxX ?? 0, e.auxY ?? 0],
+                contact_damage: e.contactDamage ?? e.type?.contactDamage ?? 1,
+                shot_dmg: e.shotDmg ?? 1,
+                shot_speed_mult: e.shotSpeedMult ?? 1,
+                speed: e.speed ?? e.type?.speed ?? 0,
+                shoot_cd: e.shootCd ?? 0,
+                state_t: e.stateT ?? 0,
+                lock_dir: [e.auxX ?? 0, e.auxY ?? 0],
+                aux2: [e.aux2X ?? 0, e.aux2Y ?? 0],
+                duo: !!(e.duoPartner && e.duoPartner.hp > 0),
+                arena_on: !!e.arenaOn,
+                arena_kind: e.arenaKind || null,
+                arena_t: e.arenaT ?? 0,
+                tier: e.tier ?? 0,
             });
         }
     }
@@ -264,6 +298,15 @@ window.__eosObserve = () => {
             dmg_mult: mult.damage ?? 1,
             fire_mult: mult.fireDelay ?? 1,
             move_mult: mult.moveSpeed ?? 1,
+            // the whole modifier set, as the game composes it
+            // (player.recompute): additive bonuses, multipliers, and the
+            // behaviour counters behind orbs, homing, piercing and so on
+            id: it.id || null,
+            add: { ...add },
+            mult: { ...mult },
+            flags: { ...(it.mods?.flags || {}) },
+            cursed: !!it.cursed,
+            unique: !!it.unique,
         };
     };
 
@@ -361,6 +404,8 @@ window.__eosObserve = () => {
             spawningEnemies.push({
                 x: e.x ?? 0,
                 y: e.y ?? 0,
+                type: e.type?.id || null,
+                spawn_timer: e.spawnTimer ?? 0,
                 distance: dist(e.x ?? 0, e.y ?? 0),
             });
         }
@@ -400,6 +445,7 @@ window.__eosObserve = () => {
         item_name: g.nearChoice.item?.name || null,
         item_rarity: g.nearChoice.item?.rarity || null,
         item_desc: g.nearChoice.item?.desc || null,
+        item_mods: itemMods(g.nearChoice.item),
         distance: dist(g.nearChoice.x ?? 0, g.nearChoice.y ?? 0),
     } : null;
 
@@ -443,6 +489,8 @@ window.__eosObserve = () => {
                 vx: sh.vx ?? 0,
                 vy: sh.vy ?? 0,
                 radius: sh.radius ?? 6,
+                dmg: sh.dmg ?? 1,
+                slow: sh.slow ?? 0,
                 distance: dist(sh.x ?? 0, sh.y ?? 0),
             });
         }
@@ -457,6 +505,7 @@ window.__eosObserve = () => {
                 y: hz.y,
                 r: hz.r,
                 remaining: Math.max(0, (hz.fuse ?? 0) - (hz.t ?? 0)),
+                dmg: hz.dmg ?? 1,
                 distance: dist(hz.x, hz.y),
             });
         }
@@ -529,6 +578,23 @@ window.__eosObserve = () => {
         }
     }
 
+    const shotSectors = new Array(16).fill(0);
+    for (const sh of activeShots) {
+        const speedSq = sh.vx * sh.vx + sh.vy * sh.vy;
+        if (speedSq < 1) continue;
+        const px = p.x ?? 0;
+        const py = p.y ?? 0;
+        let t = ((px - sh.x) * sh.vx + (py - sh.y) * sh.vy) / speedSq;
+        if (t < 0 || t > 1.0) continue;
+        const cx = sh.x + sh.vx * t - px;
+        const cy = sh.y + sh.vy * t - py;
+        if (Math.hypot(cx, cy) > 40 + sh.radius) continue;
+        // sector of the direction the orb comes FROM
+        const a = Math.atan2(-sh.vy, -sh.vx);
+        const k = ((Math.round(a / (Math.PI / 8)) % 16) + 16) % 16;
+        shotSectors[k] = Math.max(shotSectors[k], 1 - t);
+    }
+
     return {
         state: g.state,
         hp: p.hp ?? 0,
@@ -594,6 +660,44 @@ window.__eosObserve = () => {
         // death audit reads to attribute each lost heart to a culprit.
         killer: g.killerName || null,
         killer_was_boss: !!g.killerWasBoss,
+        // — added with the mouse aim —
+        // Time before the next orb can leave, the hero's own velocity,
+        // the dash in progress and the swamp's slow: what a shot or a
+        // dodge is worth right now.
+        fire_cd: Math.max(0, p.fireT ?? 0),
+        player_vx: p.vx ?? 0,
+        player_vy: p.vy ?? 0,
+        dash_t: p.dashT ?? 0,
+        slow_t: p.slowT ?? 0,
+        // The build: every relic carried, and the synergies it lit.
+        items: (p.items || []).map((it) => ({
+            id: it.id || null, rarity: it.rarity || null, mods: itemMods(it),
+        })),
+        synergies: p.syn ? Array.from(p.syn) : [],
+        mods: p.mods ? { ...p.mods } : {},
+        // The room's remaining decisions and their state.
+        second_wave: !!node?.secondWave && !node?.secondWaveDone,
+        gambles_left: node?.gamblesLeft === undefined ? 3 : node.gamblesLeft,
+        defi_done: !!node?.defiDone,
+        defi_active: !!g.defiActive,
+        defi_t: g.defiT ?? 0,
+        in_transition: !!g.transition,
+        // The biome's own hazards: slowing patches (brambles, mud) and the
+        // ruins' gust, read from the strata module.
+        strata_zones: (window.__eosStrates?.zones || []).map((z) => ({
+            x: z.x, y: z.y, r: z.r, distance: dist(z.x, z.y),
+        })),
+        wind: window.__eosStrates?.wind ? {
+            dir: [window.__eosStrates.wind.dirX, window.__eosStrates.wind.dirY],
+            t: window.__eosStrates.wind.t,
+            windup: window.__eosStrates.wind.windup,
+            dur: window.__eosStrates.wind.dur,
+            push: window.__eosStrates.wind.push,
+        } : null,
+        // Orbs by bearing: for each of 16 sectors around the player, how
+        // soon the most pressing orb heading this way arrives (1 = now,
+        // 0 = none within a second), over EVERY orb on screen.
+        shot_sectors: shotSectors,
     };
 };
 """
@@ -602,10 +706,24 @@ window.__eosObserve = () => {
 # One synchronous env step: press the keys, advance the fixed-step
 # simulation, release, optionally draw, and read the new state — a single
 # browser round-trip instead of key events plus a real-time sleep.
-STEP_TURBO_JS = """({ codes, frames, render }) => {
+STEP_TURBO_JS = """({ codes, frames, render, aim }) => {
+    // Mouse aim: the game fires toward the cursor while the button is held
+    // and no arrow key is down (player.js). A far point keeps the direction
+    // stable over the 43 px the hero can cover during one step. Only in
+    // play: the title menu reacts to the cursor position.
+    const m = window.__eosDebug.mouse;
+    const g = window.__eosGame;
+    if (aim && g.state === 'play') {
+        m.x = g.player.x + aim[0] * 5000;
+        m.y = g.player.y + aim[1] * 5000;
+        m.down = true;
+    } else {
+        m.down = false;
+    }
     for (const code of codes) window.dispatchEvent(new KeyboardEvent('keydown', { code }));
     window.__eosAdvance(frames, 1 / 120);
     for (const code of codes) window.dispatchEvent(new KeyboardEvent('keyup', { code }));
+    m.down = false;
     if (render) window.__eosRender();
     return window.__eosObserve();
 }"""
@@ -714,6 +832,26 @@ class Observation:
     # snapshot can show it.
     stuck_steps: int = 0
     room_steps: int = 0
+    # Read since the mouse aim (see __eosObserve): the hero's own timers
+    # and velocity, the build, the room's pending decisions, the biome's
+    # strata and the orbs by bearing.
+    fire_cd: float = 0.0
+    player_vx: float = 0.0
+    player_vy: float = 0.0
+    dash_t: float = 0.0
+    slow_t: float = 0.0
+    items: list[dict[str, Any]] = field(default_factory=list)
+    synergies: list[str] = field(default_factory=list)
+    mods: dict[str, Any] = field(default_factory=dict)
+    second_wave: bool = False
+    gambles_left: int = 3
+    defi_done: bool = False
+    defi_active: bool = False
+    defi_t: float = 0.0
+    in_transition: bool = False
+    strata_zones: list[dict[str, Any]] = field(default_factory=list)
+    wind: dict[str, Any] | None = None
+    shot_sectors: list[float] = field(default_factory=list)
 
 
 class EclipseEnv:
@@ -766,6 +904,7 @@ class EclipseEnv:
         self._context.add_init_script(OBSERVE_SETUP_JS)
         self.page = self._context.new_page()
         self.page.route("**/js/main.js", self._patch_main_js)
+        self.page.route("**/js/game/strates.js", self._patch_strates_js)
         self._last_obs = None
 
     def close(self) -> None:
@@ -851,21 +990,38 @@ class EclipseEnv:
         else:
             time.sleep(0.3)
 
-    def step(self, action: str) -> tuple[Observation, float, bool, dict[str, Any]]:
+    def step(
+        self, action: str, aim: tuple[float, float] | None = None
+    ) -> tuple[Observation, float, bool, dict[str, Any]]:
+        """Hold the keys of `action` for one step; `aim` fires at the mouse.
+
+        `aim` is a unit vector in game coordinates (y downward). The game
+        gives the arrow keys priority over the cursor, so an action that
+        already shoots cannot take an aim: refusing it beats a silent no-op.
+        """
         if action not in ACTIONS:
             raise ValueError(f"Unknown action {action!r}. Available actions: {sorted(ACTIONS)}")
+        if aim is not None:
+            if any(code.startswith("Arrow") for code in ACTIONS[action]):
+                raise ValueError(f"{action!r} shoots with the arrows; it cannot take an aim.")
+            norm = (aim[0] ** 2 + aim[1] ** 2) ** 0.5
+            aim = None if norm < 1e-6 else (aim[0] / norm, aim[1] / norm)
 
         # Reuse the previous snapshot as "before": a single evaluate per step
         # roughly doubles the real-time step rate.
         before = self._last_obs if self._last_obs is not None else self.observe()
         if self.turbo:
-            after = self._step_turbo(ACTIONS[action])
+            after = self._step_turbo(ACTIONS[action], aim)
         else:
+            if aim is not None:
+                self._aim_realtime(aim)
             self._hold_keys(ACTIONS[action], self.step_seconds)
+            if aim is not None:
+                self._require_page().mouse.up()
             after = self.observe()
         reward = self._reward(before, after)
         done = after.state in TERMINAL_STATES
-        return after, reward, done, {"action": action}
+        return after, reward, done, {"action": action, "aim": aim}
 
     def observe(self) -> Observation:
         data = self._eval_game("() => window.__eosObserve()")
@@ -896,16 +1052,38 @@ class EclipseEnv:
         obs = self._last_obs if self._last_obs is not None else self.observe()
         return obs.state in TERMINAL_STATES
 
-    def _step_turbo(self, codes: list[str]) -> Observation:
+    def _step_turbo(
+        self, codes: list[str], aim: tuple[float, float] | None = None
+    ) -> Observation:
         data = self._require_page().evaluate(
             STEP_TURBO_JS,
             {
                 "codes": codes,
                 "frames": self._frames_per_step,
                 "render": not self.headless,
+                "aim": list(aim) if aim is not None else None,
             },
         )
         return self._track(Observation(**data))
+
+    def _aim_realtime(self, aim: tuple[float, float]) -> None:
+        """Real-time counterpart of the turbo aim: move the cursor, press.
+
+        Playwright clips the cursor to the viewport, so the point is kept
+        inside the canvas rather than far away (input.js maps client
+        coordinates back to the 1280x720 game view).
+        """
+        page = self._require_page()
+        rect = page.evaluate(
+            "() => { const c = document.getElementById('game').getBoundingClientRect();"
+            " const p = window.__eosGame.player;"
+            " return [c.left, c.top, c.width, c.height, p.x, p.y]; }"
+        )
+        left, top, width, height, px, py = rect
+        gx = min(max(px + aim[0] * 600, 1), 1279)
+        gy = min(max(py + aim[1] * 600, 1), 719)
+        page.mouse.move(left + gx / 1280 * width, top + gy / 720 * height)
+        page.mouse.down()
 
     def _advance(self, frames: int) -> None:
         self._require_page().evaluate(
@@ -981,6 +1159,19 @@ class EclipseEnv:
         return self.page
 
     @staticmethod
+    def _patch_strates_js(route: Any) -> None:
+        # The biome strata (slowing patches, the ruins' gust) live in a
+        # module-private object; hand it to the observer.
+        response = route.fetch()
+        source = response.text()
+        patched = source + "\nif (typeof window !== 'undefined') window.__eosStrates = state;\n"
+        route.fulfill(
+            response=response,
+            body=patched,
+            headers={**response.headers, "content-type": "application/javascript"},
+        )
+
+    @staticmethod
     def _patch_main_js(route: Any) -> None:
         response = route.fetch()
         source = response.text()
@@ -992,14 +1183,15 @@ class EclipseEnv:
             "import { enemyShots } from './game/enemyshot.js';\n"
             "import { hazards } from './game/boss.js';\n"
             "import { rollItem } from './data/items.js';\n"
-            "import { consommer } from './core/hitstop.js';",
+            "import { consommer } from './core/hitstop.js';\n"
+            "import { getMouse } from './core/input.js';",
             1,
         )
         patched = patched.replace(
             "const game = new Game(view);",
             "const game = new Game(view); "
             "window.__eosGame = game; "
-            "window.__eosDebug = { enemies, pickups, enemyShots, hazards, rollItem }; "
+            "window.__eosDebug = { enemies, pickups, enemyShots, hazards, rollItem, mouse: getMouse() }; "
             # The hero-select screen starts the run without a seed: hand it
             # the one from the URL so the dungeon is the requested one.
             "game.startRun = ((orig) => function (seed) { "
