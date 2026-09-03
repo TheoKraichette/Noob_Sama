@@ -342,7 +342,8 @@ def featurize(obs: Observation, previous: Observation | None = None) -> list[flo
     return features
 
 
-def _count_features() -> int:
+def _dummy_observation() -> Observation:
+    """An empty but complete observation, for counting a vector's length."""
     from dataclasses import fields
 
     dummy_values = {
@@ -424,7 +425,11 @@ def _count_features() -> int:
         "shot_sectors": [0.0] * 16,
     }
     assert {f.name for f in fields(Observation)} == set(dummy_values)
-    return len(featurize(Observation(**dummy_values)))
+    return Observation(**dummy_values)
+
+
+def _count_features() -> int:
+    return len(featurize(_dummy_observation()))
 
 
 N_FEATURES = 0
