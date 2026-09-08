@@ -62,6 +62,8 @@ def target_score(obs: Observation, enemy: dict) -> float:
         score *= 0.2
     max_hp = enemy.get("max_hp") or 1.0
     score += 0.8 * (1.0 - enemy.get("hp", max_hp) / max_hp)
+    if enemy.get("hp", max_hp) <= obs.damage:
+        score += 2.0  # one more orb finishes it: do not look away
     score -= distance / 470.0
     if distance > obs.shot_range:
         score *= 0.3

@@ -301,12 +301,17 @@ def candidates(obs: Observation, allow_dash: bool = True) -> list[Candidate]:
 
 def _walls(obs: Observation):
     wt = obs.room_wt or 46.0
+    # open doorways: the wall does not clamp inside the opening (room.js
+    # collideCircle, door width 112 minus a 6 px lip on each side)
+    doors = {d.get("dir") for d in obs.available_doors} if obs.doors_open else set()
     return (wt + PLAYER_R, obs.room_w - wt - PLAYER_R, wt + PLAYER_R, obs.room_h - wt - PLAYER_R,
-            [(o["x"], o["y"], o["r"] + PLAYER_R) for o in obs.obstacles])
+            [(o["x"], o["y"], o["r"] + PLAYER_R) for o in obs.obstacles], doors)
 
 
 def _simulate(obs: Observation, c: Candidate, speed: float, walls) -> None:
-    x0, x1, y0, y1, pillars = walls
+    x0, x1, y0, y1, pillars, doors = walls
+    half_w, half_h = obs.room_w / 2.0, obs.room_h / 2.0
+    lip = 56.0 - 6.0 - PLAYER_R
     x, y = obs.x, obs.y
     dx, dy = c.direction
     path = [(x, y)]
@@ -321,11 +326,16 @@ def _simulate(obs: Observation, c: Candidate, speed: float, walls) -> None:
         else:
             v = speed
         nx, ny = x + dx * v * DT, y + dy * v * DT
-        wanted += v * DT
+        if dx or dy:
+            wanted += v * DT  # standing still asks for no travel, so a wall never pins it
         # walls, then pillars (room.js collideCircle, doors ignored: a
         # candidate that leaves through a door is judged on the room only)
-        nx = min(max(nx, x0), x1)
-        ny = min(max(ny, y0), y1)
+        in_door_x = abs(nx - half_w) < lip
+        in_door_y = abs(ny - half_h) < lip
+        if not (in_door_x and (("up" in doors and ny < y0) or ("down" in doors and ny > y1))):
+            ny = min(max(ny, y0), y1)
+        if not (in_door_y and (("left" in doors and nx < x0) or ("right" in doors and nx > x1))):
+            nx = min(max(nx, x0), x1)
         for ox, oy, orr in pillars:
             ddx, ddy = nx - ox, ny - oy
             d2 = ddx * ddx + ddy * ddy
@@ -364,6 +374,9 @@ def _judge(c: Candidate, frames: list[list[Circle]]) -> None:
 # ---------------------------------------------------------------------------
 # Choosing
 # ---------------------------------------------------------------------------
+
+last_candidates: list[Candidate] = []  # the last evaluation, for diagnosis
+
 
 @dataclass
 class Goal:
@@ -425,6 +438,8 @@ def choose(obs: Observation, goal: Goal, allow_dash: bool = True) -> Candidate:
         if c.dash and walk_safe:
             cost += 5.0
         c.cost = cost
+    global last_candidates
+    last_candidates = cands
     return min(cands, key=lambda c: c.cost)
 
 

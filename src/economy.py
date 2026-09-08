@@ -38,6 +38,9 @@ FLAG_WORTH = {
     "bounces": 0.2, "explodeOnKill": 0.3, "explodeOnCrit": 0.3, "blink": 0.4,
     "dashDamage": 0.1, "thorns": 0.1, "novaOnHurt": 0.15, "slowAllOnHurt": 0.3,
     "backShot": 0.15, "sideShots": 0.25, "multishot": 0.0,  # multishot is in the dps term
+    # serpentine shots swing +/-31 degrees (game.js): they miss from the
+    # distance this policy keeps
+    "wave": -0.5,
 }
 
 BASE_DAMAGE = 1.0

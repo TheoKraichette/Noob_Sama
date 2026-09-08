@@ -1068,6 +1068,10 @@ STANDOFF = {
 
 _last_dir: tuple[float, float] | None = None
 
+# Steps in one room after which a fight is judged stuck (90 s of game
+# time; a room is cleared in 150-300 steps when things go well).
+STALLED_FIGHT = 600
+
 
 def _decision_v2(
     obs: Observation, *, lead: bool = True, priority: bool = True, bosses: bool = False
@@ -1100,11 +1104,16 @@ def _decision_v2(
         move, _ = split_shot(action)
         if move in ("interact", "skill") or move.startswith("skill"):
             return move, None
-        if not obs.hazards and not obs.shots and not obs.spawning:
-            return move, None
+        # Every step goes through the simulation, even a quiet corridor: a
+        # pillar between the hero and the door pinned it for whole runs
+        # (the keyboard rule walked straight at the door), and the
+        # simulation charges a pinned candidate for the travel it loses.
         prefer = _direction_of(move)
-        picked = mover.choose(obs, mover.Goal(prefer=prefer, hold=prefer is None, previous=_last_dir))
+        picked = mover.choose(obs, mover.Goal(prefer=prefer, hold=prefer is None, previous=_last_dir),
+                              allow_dash=move.startswith("dash_"))
         _last_dir = picked.direction if picked.action != "noop" else _last_dir
+        if picked.action == "noop" and move == "noop":
+            return "noop", None
         return picked.action, None
 
     skill = _skill_action(obs)
@@ -1129,6 +1138,13 @@ def _decision_v2(
         dx, dy = target["x"] - obs.x, target["y"] - obs.y
         distance = math.hypot(dx, dy) or 1.0
         ux, uy = dx / distance, dy / distance
+        # A fight that has lasted this long is not being won from the
+        # band (serpentine shots, a slow tank behind a pillar): close in,
+        # the simulation still refuses whatever gets hit.
+        if obs.room_steps > STALLED_FIGHT and not target.get("boss"):
+            lo, hi = 0.0, 120.0
+            goal.band = (lo, hi)
+            goal.weight_band = 2.0
         response = _boss_attack_response(obs, target, "shoot_up") if target.get("boss") else None
         table = _boss_prefer_v2(obs, target) if bosses and target.get("boss") else None
         if table is not None:
