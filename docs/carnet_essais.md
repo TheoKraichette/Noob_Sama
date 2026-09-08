@@ -935,6 +935,51 @@ Meme niveau : les regles n'ont rien appris des donjons de mesure. Les
 morts se ressemblent aussi (sillage de magma 80 PV, charge lourde 51,
 sillage de l'Eclipse 46) : c'est la ou un futur professeur gagnerait.
 
+### V54 - le clone de la phase 5
+
+Le professeur gele joue 300 episodes (curriculum d'etages 1 1 2 3 4 5 4 5,
+un donjon par episode, autres seeds que ceux de la mesure) : **1 203 849
+paires** de 439 features, dont 63 713 aux etats que le reflexe
+d'inventaire prend en charge et 454 800 dans une salle de gardien. Le
+reseau a deux tetes (384x384, direction + modificateur), les paires sont
+ponderees par classe (dash, competence, E sont 0,9 %% des etiquettes) et
+par etat (x3 chez un gardien, x2 aux etages 3+, x0,5 aux etats du
+reflexe), avec lissage 0,05 et decroissance des poids 1e-4. Trente
+epoques, une par 4 a 6 minutes, precision de validation **0.738** (0.658
+a la premiere, plateau des l'epoque 16). C'est moins que les 0.82 de la
+phase 4, sur une tache plus dure : le professeur choisit son deplacement
+par une simulation que le reseau doit reconstituer depuis les features.
+
+Evaluation en agent hybride (`audit_deaths.py --policy hybrid:`, epsilon
+0) : le reseau pilote, les reflexes de visee et d'inventaire sont ceux du
+professeur.
+
+| Agent | Score | Salles / ep. | Etages / ep. | PV / salle [IC 95 %%] | Etage 5 atteint | Victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Clone phase 4 (`bc_agent_v6`, V45) | 249.49 | 8.9 | 0.94 | 1.049 [0.996, 1.106] | 0/80 | 0/80 |
+| **Clone phase 5 (`bc2_agent`)** | **636.42 +/- 30.90** | **20.9** | **2.48** | **0.893 [0.835, 0.951]** | **20/80** | **7/80** |
+| Professeur gele (V51b) | 985.67 | 32.0 | 3.77 | 0.209 [0.185, 0.235] | 70/80 | 60/80 |
+
+Contre le clone de la phase 4 : 2,5 fois le score, 2,3 fois les salles,
+et les **premieres victoires d'un agent appris** (7, dont une a 1 120
+points). Contre son professeur, apparie : -349 points, -11 salles, PV par
+salle +0.684 (intervalle [+0.622, +0.743]), 7 donjons sur 80 ou il fait
+mieux. Le clone est a 65 %% du professeur en score et en salles, mais a
+quatre fois ses PV perdus par salle : il tient les etages 1-2 (11 morts),
+meurt aux etages 3-4 (43 morts) et arrive vingt fois a l'etage 5. Ses
+tueurs sont ceux du professeur de la phase 4 - les projectiles (35 %% des
+PV), la charge lourde et le triple bond de Vorace - c'est-a-dire
+exactement ce que la simulation de deplacement esquive et que le reseau
+n'a qu'imparfaitement appris. Neuf runs epuisent leur budget, dont une
+figee dans une salle d'autel et une dans une boutique : des etats rares
+dans les demonstrations.
+
+Deux pistes, dans l'ordre : une ronde DAgger (le clone joue, le
+professeur etiquette) pour couvrir ces etats-la, puis donner au reseau ce
+que le professeur voit reellement quand il choisit son pas - pour chacun
+des dix-sept deplacements, le verdict de la simulation sur le prochain
+0,6 s - comme la phase 3 avait donne le champ de danger.
+
 ## Limites connues
 
 - Les donjons ne sont pas seedables, donc les evaluations courtes restent

@@ -705,6 +705,141 @@ python scripts/watch_dqn.py --agent models/bc_agent_v6.json --episodes 20 \
     --max-steps 9000 --headless --turbo --output reports/eval_bc_v6.csv
 ```
 
+## Phase 5 - viser juste, esquiver vraiment, finir la run
+
+La phase 4 s'arretait sur un constat : 0.84 PV perdu par salle quand il en
+faudrait environ 0.2 pour finir les 46 salles avec six demi-coeurs. L'audit
+disait ou : **47 %% des PV au corps a corps pur** (aucun projectile, aucune
+zone a l'ecran), 39 %% avec un seul ennemi present, et le deuxieme tueur du
+jeu etait l'Ame errante, l'ennemi le plus lent du bestiaire. La cause etait
+la visee : huit rayons clavier, 41 %% des tirs capables de toucher, et des
+regles qui font marcher le heros autour de sa cible pour l'aligner - donc
+vers elle.
+
+### Trois changements de methode
+
+**Lire les regles a la source.** Le jeu est public et son code aussi
+(`js/data/enemies.js`, `js/game/enemy.js`, `js/game/boss.js`,
+`js/data/items.js`, `js/data/difficulty.js`, version 4.1.0, celle que sert
+itch). Vitesse et rayon de chaque famille, duree exacte de chaque
+telegraphe (un chargeur verrouille sa visee a 0,28 s et part a 0,5 s pour
+0,34 s ; un tireur tire a 0,52 s ; une bombe explose apres sa meche sur son
+rayon de souffle), attaques nommees des onze gardiens, effets des 159
+reliques : plus une constante n'est devinee (`src/bestiary.py`). Le code
+sert a lire les regles ; l'agent joue toujours la version itch.
+
+**Viser a la souris.** `js/core/input.js` offre une visee a 360 degres au
+clic gauche, entree officielle de tout joueur ; les fleches gardent la
+priorite. L'environnement la pilote (`step(action, aim)`) en turbo comme en
+temps reel. Les 96 actions clavier et la baseline a 14 actions ne bougent
+pas ; le score, le budget et la baseline sont ceux des phases precedentes.
+
+**Mesurer sur des donjons apparies.** `Math.random` du jeu est remplace par
+un generateur seede a l'ouverture de la page : deux runs de meme seed avec
+la meme politique sont identiques pas a pas (verifie sur 1 500 pas, machine
+chargee). Chaque essai se joue sur **80 donjons** (seeds 1000 a 1079) et
+`scripts/compare_paired.py` mesure la difference donjon par donjon ; la
+decision se prend sur les **PV perdus par salle** (somme sur somme, coup
+fatal compris - l'audit l'oubliait) avec un intervalle a 95 %% par
+bootstrap. Un essai est adopte si l'intervalle exclut zero et si les salles
+par episode ne reculent pas ; un essai neutre est retire.
+
+### Le professeur, essai par essai
+
+| Essai | Score | Salles / ep. | PV / salle [IC 95 %%] | Victoires | Verdict |
+| --- | --- | --- | --- | --- | --- |
+| V45 professeur phase 4 | 358.81 | 12.2 | 1.032 [0.963, 1.108] | 2/80 | point zero |
+| V46 visee a la souris | 552.42 | 18.4 | 0.836 [0.758, 0.917] | 7/80 | adopte |
+| V47 zone morte, V48 anticipation, V49 priorite de cible | 515-559 | 17-19 | 0.83-0.86 | 5-6/80 | neutres |
+| **V50 deplacement predictif** | **992.23** | **32.2** | **0.211 [0.184, 0.239]** | **64/80** | **adopte** |
+| V51 corrections de blocage | 985.67 | 32.0 | 0.209 [0.185, 0.235] | 60/80 | neutre, conserve |
+| V52 table des gardiens, V53 economie de build | 963-1002 | 31-33 | 0.18-0.21 | 59-63/80 | neutres |
+| **Professeur gele, 80 donjons jamais vus (seeds 2000-2079)** | **1007.30** | **32.5** | **0.175 [0.150, 0.203]** | **60/80** | validation |
+
+Deux essais font tout le chemin. La souris (V46) fait passer les tirs
+capables de toucher de 41 %% a la totalite et double les etages franchis. Le
+**deplacement predictif** (V50, `src/mover.py`) remplace les regles
+d'esquive par une simulation : les dix-sept deplacements que le clavier
+permet (immobile, huit marches, huit dashs) sont joues sur 0,6 s a 20 Hz
+contre ce que le jeu va faire - orbes en vol, zones qui eclatent a la fin
+de leur meche, chargeur qui va foncer sur la droite qu'il a verrouillee,
+bombe amorcee, tireur en preparation, attaque de gardien annoncee. Un
+candidat touche est elimine ; parmi les autres, le moins cher pour le
+combat gagne : bande de distance par famille (un chargeur se tient a 240-350
+px parce que sa charge fait 170-218 px), ligne de vue, direction demandee,
+et un dash qui coute cinq points quand une marche suffit. La securite est
+une contrainte, jamais un objectif : maximiser le degagement envoyait le
+heros dans les coins (V41-V42). Difference appariee V50 contre V49 : PV
+par salle -0.653, intervalle [-0.731, -0.576], victoires 5 -> 64, meilleur
+sur 75 donjons sur 80.
+
+Les essais neutres sont documentes au carnet, dont une regression
+instructive : les corrections de blocage (V51) ont d'abord fait passer les
+victoires de 64 a 45 parce qu'un bug comptait « rester immobile » comme un
+mur rencontre, et le heros ne pouvait plus attendre une piece aimantee.
+
+### Ce qui est appris, et ce qui ne l'est pas
+
+L'agent de la phase 5 est **hierarchique**. Un reseau appris decide le
+pilotage - vingt actions : rester, huit directions, huit dashs, la
+competence, la touche E. Deux reflexes explicites, **les memes fonctions
+pour le professeur et pour l'eleve**, font ce qu'un joueur de twin-stick
+fait de l'autre main et entre les combats : la visee (`src/aiming.py`, le
+choix de la cible et l'angle du tir) et l'inventaire (`policies.
+economy_action` : piedestal, achat, autel, portail, une trentaine de
+decisions par run). Le clone est donc mesure sur le pilote qu'il a appris,
+et l'ablation ci-dessous dit ce que cette partie apprise vaut.
+
+Le vecteur d'observation passe a **439 features** (`src/features2.py`) :
+tout ce que le professeur consulte y est - famille et affixe de chaque
+ennemi, avancement de son telegraphe, recharge de sa prochaine attaque,
+attaque du gardien par son nom, reliques portees, direction visee. Le
+reseau (`src/dqn.py`) a **deux tetes**, direction et modificateur (marche,
+dash, competence, E), des poids par classe pour les actions rares et un
+lissage d'etiquettes contre un professeur parfois ambigu.
+
+### Resultats
+
+Protocole : 80 episodes x 9 000 steps, seeds 1000 a 1079, etage 1,
+inventaire vide, sauvegarde vierge.
+
+| Agent | Score | Salles / ep. | PV / salle | Etage 5 atteint | Victoires |
+| --- | --- | --- | --- | --- | --- |
+| Aleatoire (40 ep.) | 17.13 | 0.05 | - | 0/40 | 0/40 |
+| Clone phase 4 (`bc_agent_v6`) | 249.49 | 8.9 | 1.049 | 0/80 | 0/80 |
+| **Clone phase 5 (`bc2_agent.json`, V54)** | **636.42 +/- 30.9** | **20.9** | **0.893** | **20/80** | **7/80** |
+| Professeur phase 5 (V51) | 985.67 | 32.0 | 0.209 | 70/80 | 60/80 |
+
+Le clone de la phase 5 fait 2,5 fois le score de celui de la phase 4 et
+remporte les premieres victoires d'un agent appris (7 sur 80, contre 0), a
+37 fois la baseline. Il reste a 65 %% de son professeur en salles et perd
+quatre fois plus de PV par salle : la simulation de deplacement est une
+fonction fine a imiter. La ronde DAgger et l'ablation sont au carnet (V55
+et suivants).
+
+### Reproduction
+
+```bash
+# Point zero et mesures appariees (80 donjons, seeds 1000-1079)
+python scripts/audit_deaths.py --policy heuristic --episodes 80 --workers 4 --seed 1000 \
+    --output reports/death_audit_v45_zero_teacher.csv
+python scripts/audit_deaths.py --policy teacher:lead,priority,mover --episodes 80 --workers 4 \
+    --seed 1000 --output reports/death_audit_v51b_unstall.csv
+python scripts/compare_paired.py reports/death_audit_v45_zero_teacher_episodes.csv \
+    reports/death_audit_v51b_unstall_episodes.csv
+
+# Le professeur, en direct
+python scripts/watch_teacher.py --episodes 1 --seed 1021
+
+# Demonstrations (300 episodes, curriculum d'etages), clonage, evaluation
+python scripts/collect_demos2.py --teacher lead,priority,mover --episodes 300 --workers 6 \
+    --floors 1 1 2 3 4 5 4 5 --seed 42 --output data/demos2_v1.npz
+python scripts/train_bc2.py --demos data/demos2_v1.npz --epochs 30 --output models/bc2_agent.json
+python scripts/audit_deaths.py --policy hybrid:models/bc2_agent.json --episodes 80 --workers 4 \
+    --seed 1000 --output reports/death_audit_clone2.csv
+python scripts/watch_agent2.py --agent models/bc2_agent.json --episodes 3 --turbo --headless
+```
+
 ## Demo de l'agent entraine
 
 L'agent se recharge depuis un script neuf, sans relancer l'entrainement, et
