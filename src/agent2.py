@@ -22,11 +22,13 @@ from src.policies import economy_action, split_shot
 
 
 class HybridAgent:
-    def __init__(self, net: DQNAgent, *, lead: bool = True, priority: bool = True, epsilon: float = 0.0):
+    def __init__(self, net: DQNAgent, *, lead: bool = True, priority: bool = True,
+                 epsilon: float = 0.0, economy: bool = True):
         self.net = net
         self.lead = lead
         self.priority = priority
         self.epsilon = epsilon
+        self.economy = economy  # False: the network alone handles loot, shops and portals (ablation)
         self._target: dict | None = None
         self.rng = np.random.default_rng(0)
 
@@ -42,7 +44,7 @@ class HybridAgent:
         target = aiming.pick_target(obs, self._target) if self.priority else obs.nearest_enemy
         self._target = target
         aim = aiming.aim_vector(obs, target, lead=self.lead) if target else None
-        eco = economy_action(obs)
+        eco = economy_action(obs) if self.economy else None
         if eco is not None:
             move, _ = split_shot(eco)
             return move, aim, {"source": "economy", "target": target}

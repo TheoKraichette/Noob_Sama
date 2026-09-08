@@ -36,6 +36,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-steps", type=int, default=9000)
     parser.add_argument("--step-seconds", type=float, default=0.15)
     parser.add_argument("--headless", action="store_true")
+    parser.add_argument(
+        "--pace", type=float, default=None,
+        help="Seconds of wall clock per step when watching in --turbo: the "
+        "simulation stays exact (the mode every measure uses) and the window "
+        "is drawn at a human pace. Default: the step length itself.",
+    )
     parser.add_argument("--turbo", action="store_true")
     parser.add_argument("--epsilon", type=float, default=0.0)
     parser.add_argument("--seed", type=int, default=-1, help="Dungeon seed of episode 1 (-1: the game's clock).")
@@ -49,6 +55,7 @@ def main() -> None:
     print(f"agent={args.agent} features={agent.net.n_features} ({agent.net.feature_version}) "
           f"actions={len(agent.net.actions)} heads={agent.net.heads}")
     rows = []
+    pace = args.pace if args.pace is not None else (args.step_seconds if args.turbo and not args.headless else 0.0)
     with EclipseEnv(headless=args.headless, turbo=args.turbo, step_seconds=args.step_seconds) as env:
         for episode in range(1, args.episodes + 1):
             seed = args.seed + episode - 1 if args.seed >= 0 else None
@@ -64,6 +71,8 @@ def main() -> None:
                 previous = obs
                 obs, _reward, done, _ = env.step(action, aim)
                 steps += 1
+                if pace:
+                    time.sleep(pace)
             row = {
                 "episode": episode, "seed": seed if seed is not None else "", "steps": steps,
                 "done": done, "won": obs.state == "victory", "score": round(env.get_score(), 3),

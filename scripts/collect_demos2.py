@@ -46,7 +46,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument(
         "--teacher",
-        default="lead,priority,mover,build",
+        default="lead,priority,mover",
         help="Options of the teacher (see audit_deaths.py --policy teacher:...).",
     )
     parser.add_argument("--policy", type=Path, default=None, help="DAgger: this agent plays.")

@@ -30,11 +30,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--episodes", type=int, default=1)
     parser.add_argument("--max-steps", type=int, default=9000)
     parser.add_argument("--step-seconds", type=float, default=0.15)
-    parser.add_argument("--teacher", default="lead,priority,mover,bosses,build",
+    parser.add_argument("--teacher", default="lead,priority,mover",
                         help="Options of the teacher, comma separated (see audit_deaths.py).")
     parser.add_argument("--seed", type=int, default=-1, help="Dungeon seed of episode 1 (-1: the game's clock).")
     parser.add_argument("--turbo", action="store_true", help="Simulation speed instead of real time.")
     parser.add_argument("--headless", action="store_true")
+    parser.add_argument(
+        "--pace", type=float, default=None,
+        help="Seconds of wall clock per step when watching in --turbo: the "
+        "simulation stays exact (the mode every measure uses) and the window "
+        "is drawn at a human pace. Default: the step length itself.",
+    )
     return parser.parse_args()
 
 
@@ -43,6 +49,7 @@ def main() -> None:
     options = {flag: False for flag in FLAGS.values()}
     for token in filter(None, args.teacher.split(",")):
         options[FLAGS[token]] = True
+    pace = args.pace if args.pace is not None else (args.step_seconds if args.turbo and not args.headless else 0.0)
     with EclipseEnv(headless=args.headless, turbo=args.turbo, step_seconds=args.step_seconds) as env:
         for episode in range(1, args.episodes + 1):
             seed = args.seed + episode - 1 if args.seed >= 0 else None
@@ -55,6 +62,8 @@ def main() -> None:
                 action, aim = heuristic_decision(obs, **options)
                 obs, _reward, done, _ = env.step(action, aim)
                 steps += 1
+                if pace:
+                    time.sleep(pace)
                 key = (obs.floor, obs.rooms)
                 if key != last_room:
                     last_room = key

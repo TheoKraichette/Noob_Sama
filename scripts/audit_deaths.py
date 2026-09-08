@@ -106,6 +106,9 @@ def audit_shard(job: dict) -> dict:
         teacher = teacher_options(cfg["policy"])
     elif cfg["policy"].startswith("hybrid:"):
         hybrid = HybridAgent.load(cfg["policy"][7:], epsilon=cfg["epsilon"])
+    elif cfg["policy"].startswith("hybrid-noeco:"):
+        # ablation: the learned pilot without the inventory reflex
+        hybrid = HybridAgent.load(cfg["policy"][13:], epsilon=cfg["epsilon"], economy=False)
     else:
         agent = DQNAgent.load(Path(cfg["policy"]))
 
@@ -267,8 +270,8 @@ def audit_shard(job: dict) -> dict:
 
 def main() -> None:
     args = parse_args()
-    if args.policy.startswith("hybrid:"):
-        probe = HybridAgent.load(args.policy[7:]).net
+    if args.policy.startswith("hybrid"):
+        probe = HybridAgent.load(args.policy.split(":", 1)[1]).net
         print(f"policy={args.policy} features={probe.n_features} heads={probe.heads}", flush=True)
     elif args.policy != "heuristic" and not args.policy.startswith("teacher"):
         probe = DQNAgent.load(Path(args.policy))
