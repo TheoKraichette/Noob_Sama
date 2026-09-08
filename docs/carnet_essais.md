@@ -866,6 +866,75 @@ c'est l'autel du sacrifice, qui retire un coeur de maximum et fait baisser
 la barre sans agresseur ; l'audit les ignore desormais (PV reels de V50
 apres correction : ~0,18 par salle).
 
+### V51 - les blocages, et un bug qui a failli passer pour un progres
+
+Les 8 runs figees de V50 ont ete reproduites (le jeu est deterministe a
+seed egale) et trois causes corrigees : un pilier entre le heros et la porte
+que la regle clavier attaquait tout droit (desormais chaque deplacement hors
+combat passe par la simulation, qui facture le trajet perdu contre un mur,
+et la simulation laisse franchir les portes ouvertes) ; un combat contre
+deux ennemis lents qui n'avancait plus a cause de tirs serpentants
+(`sillage-sinueux` fait osciller l'orbe de +/-31 degres, `game.js:2189`) -
+apres 600 pas dans la meme salle, la bande de distance se referme a 0-120 px
+et un ennemi a un tir de la mort n'est plus lache ; et l'attente de la piece
+d'or aimantee (V47).
+
+Premiere mesure (V51) : **45 victoires au lieu de 64, 23 runs figees au lieu
+de 8**. Le PV par salle baissait pourtant (0.170). Cause, trouvee en
+affichant le cout de chaque candidat de la simulation : le candidat
+« rester immobile » demandait 43 px de trajet et n'en obtenait aucun, donc
+la simulation le comptait comme bloque par un mur (+5) et ne le choisissait
+jamais. Le heros ne pouvait plus attendre une piece ni tenir une position ;
+en V50, les deplacements hors combat contournaient la simulation, ce qui
+masquait le defaut. Corrige en une ligne (`mover._simulate`).
+
+| Essai | Score | Salles / ep. | PV / salle [IC 95 %%] | Victoires | Figees |
+| --- | --- | --- | --- | --- | --- |
+| V50 mover | 992.23 | 32.2 | 0.211 [0.184, 0.239] | 64/80 | 7 |
+| V51 corrections (bug) | 914.15 | 29.0 | 0.170 [0.142, 0.203] | 45/80 | 23 |
+| **V51b corrections, immobilite reparee** | 985.67 | 32.0 | 0.209 [0.185, 0.235] | 60/80 | 6 |
+
+V51b contre V50, apparie : PV par salle -0.002, intervalle [-0.041, +0.034],
+victoires 64 -> 60. **Neutre.** Les corrections sont conservees parce
+qu'elles reparent des cas reproduits, pas parce qu'elles gagnent quelque
+chose de mesurable sur ces 80 donjons.
+
+### V52 et V53 - la table des gardiens et l'economie de build : neutres
+
+| Essai | Score | PV / salle [IC 95 %%] | Victoires | Morts | Figees | Difference appariee (PV / salle) |
+| --- | --- | --- | --- | --- | --- | --- |
+| V51b | 985.67 | 0.209 [0.185, 0.235] | 60/80 | 13 | 6 | reference |
+| V52 + table des gardiens | 963.20 | 0.181 [0.156, 0.209] | 59/80 | 15 | 7 | -0.027, IC [-0.057, +0.003] |
+| V53 + economie de build | 1001.79 | 0.206 [0.176, 0.237] | 63/80 | 11 | 4 | +0.024, IC [-0.013, +0.062] |
+
+**V52** (echo de la Tisseuse, reflets du Miroir, couronne de ronces, croix
+de givre, triple bond sans dash, penalite pour finir un pas dans une zone
+qui eclatera plus tard) fait perdre un peu moins de PV mais pas moins de
+runs : le sillage de magma reste le premier tueur (Pyroclaste 99 PV,
+Eclipse 48), et la table n'y change rien parce que la simulation le voyait
+deja. **V53** (valeur d'objet sur tous les modificateurs, autel, parieur,
+brasero, reserve d'or) gagne 4 victoires et perd 0.024 PV par salle : bruit
+dans les deux sens. Ni l'une ni l'autre n'est retenue : le professeur gele
+est **V51b**, `teacher:lead,priority,mover`. L'anticipation et la priorite
+de cible (V48, V49) restent dans cette composition parce que le
+deplacement predictif a ete mesure avec elles ; l'ablation qui les
+retirerait n'a pas ete jouee, faute de temps.
+
+### Validation sur 80 donjons jamais vus
+
+Toutes les mesures precedentes tournent sur les seeds 1000 a 1079, et les
+corrections de blocage ont ete concues en regardant ces donjons-la. Le
+professeur gele est donc rejoue sur les seeds **2000 a 2079** :
+
+| Donjons | Score | Salles / ep. | PV / salle [IC 95 %%] | Etage 5 atteint | Victoires | Figees |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1000-1079 (mesure) | 985.67 | 32.0 | 0.209 [0.185, 0.235] | 70/80 | 60/80 | 6 |
+| 2000-2079 (jamais vus) | 1007.30 | 32.5 | 0.175 [0.150, 0.203] | 72/80 | 60/80 | 4 |
+
+Meme niveau : les regles n'ont rien appris des donjons de mesure. Les
+morts se ressemblent aussi (sillage de magma 80 PV, charge lourde 51,
+sillage de l'Eclipse 46) : c'est la ou un futur professeur gagnerait.
+
 ## Limites connues
 
 - Les donjons ne sont pas seedables, donc les evaluations courtes restent
