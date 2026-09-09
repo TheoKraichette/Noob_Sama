@@ -15,16 +15,21 @@ from pathlib import Path
 
 import numpy as np
 
-from src import aiming, features2
+from src import aiming, features2, features3
 from src.dqn import DQNAgent
 from src.eos_env import MOVE_ACTIONS, Observation
 from src.policies import economy_action, split_shot
+
+
+# The feature vector a saved network expects, by the version it was trained on.
+FEATURE_MODULES = {features2.FEATURE_VERSION: features2, features3.FEATURE_VERSION: features3}
 
 
 class HybridAgent:
     def __init__(self, net: DQNAgent, *, lead: bool = True, priority: bool = True,
                  epsilon: float = 0.0, economy: bool = True):
         self.net = net
+        self.features = FEATURE_MODULES[net.feature_version]
         self.lead = lead
         self.priority = priority
         self.epsilon = epsilon
@@ -34,7 +39,13 @@ class HybridAgent:
 
     @classmethod
     def load(cls, path: Path | str, **kw) -> "HybridAgent":
-        net = DQNAgent.load(path, expect=(features2.N_FEATURES, features2.FEATURE_VERSION))
+        net = DQNAgent.load(path)
+        module = FEATURE_MODULES.get(net.feature_version)
+        if module is None or net.n_features != module.N_FEATURES:
+            raise ValueError(
+                f"{path}: model built on {net.n_features} features ({net.feature_version}), "
+                f"no matching feature module"
+            )
         return cls(net, **kw)
 
     def act(self, obs: Observation, previous: Observation | None) -> tuple[str, tuple[float, float] | None, dict]:
@@ -48,7 +59,7 @@ class HybridAgent:
         if eco is not None:
             move, _ = split_shot(eco)
             return move, aim, {"source": "economy", "target": target}
-        x = np.asarray(features2.featurize(obs, previous, aim, target), dtype=np.float32)
+        x = np.asarray(self.features.featurize(obs, previous, aim, target), dtype=np.float32)
         if self.epsilon > 0 and self.rng.random() < self.epsilon:
             action = MOVE_ACTIONS[int(self.rng.integers(len(MOVE_ACTIONS)))]
         else:

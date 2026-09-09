@@ -27,8 +27,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src import features2
+from src import features2, features3
 from src.dqn import DQNAgent
+
+FEATURE_MODULES = {"v2": features2, "v3": features3}
 from src.eos_env import MOVE_ACTIONS
 
 
@@ -54,11 +56,14 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     parts = {k: [] for k in ("states", "actions", "sources", "floors", "bosses")}
+    version = None
     for path in args.demos:
         data = np.load(path)
-        version = str(data["feature_version"]) if "feature_version" in data else "?"
-        if version != features2.FEATURE_VERSION:
-            raise SystemExit(f"{path}: features {version}, expected {features2.FEATURE_VERSION}")
+        this = str(data["feature_version"]) if "feature_version" in data else "?"
+        if version is None:
+            version = this
+        if this != version or this not in FEATURE_MODULES:
+            raise SystemExit(f"{path}: features {this}, expected {version}")
         for k in parts:
             parts[k].append(data[k])
         print(f"loaded {len(data['actions'])} pairs from {path}")
@@ -68,8 +73,9 @@ def main() -> None:
     floors = np.concatenate(parts["floors"])
     bosses = np.concatenate(parts["bosses"])
     n, n_features = states.shape
-    if n_features != features2.N_FEATURES:
-        raise SystemExit(f"demos have {n_features} features, features2 produces {features2.N_FEATURES}")
+    module = FEATURE_MODULES[version]
+    if n_features != module.N_FEATURES:
+        raise SystemExit(f"demos have {n_features} features, {version} produces {module.N_FEATURES}")
     print(f"demos: {n} pairs, {n_features} features")
 
     counts = np.bincount(actions, minlength=len(MOVE_ACTIONS)).astype(np.float64)
@@ -87,13 +93,13 @@ def main() -> None:
     val_idx, train_idx = order[:n_val], order[n_val:]
 
     if args.init:
-        agent = DQNAgent.load(args.init, seed=args.seed, expect=(n_features, features2.FEATURE_VERSION))
+        agent = DQNAgent.load(args.init, seed=args.seed, expect=(n_features, version))
         agent.lr = args.lr
         agent.weight_decay = args.weight_decay
     else:
         agent = DQNAgent(
             n_features, list(MOVE_ACTIONS), hidden=tuple(args.hidden), lr=args.lr, seed=args.seed,
-            heads=not args.no_heads, feature_version=features2.FEATURE_VERSION,
+            heads=not args.no_heads, feature_version=version,
             weight_decay=args.weight_decay,
         )
 

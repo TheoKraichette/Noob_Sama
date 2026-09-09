@@ -25,8 +25,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src import features2, policies
+from src import features2, features3, policies
 from src.agent2 import HybridAgent
+
+FEATURE_MODULES = {"v2": features2, "v3": features3}
 from src.eos_env import MOVE_ACTIONS, EclipseEnv
 from src.features import is_combat_state
 from src.policies import economy_action, heuristic_decision
@@ -50,6 +52,8 @@ def parse_args() -> argparse.Namespace:
         help="Options of the teacher (see audit_deaths.py --policy teacher:...).",
     )
     parser.add_argument("--policy", type=Path, default=None, help="DAgger: this agent plays.")
+    parser.add_argument("--features", choices=sorted(FEATURE_MODULES), default="v3",
+                        help="Feature vector recorded (v3 adds the simulation's verdicts).")
     parser.add_argument("--floors", type=int, nargs="+", default=[1])
     parser.add_argument("--travel-keep", type=float, default=0.34)
     parser.add_argument("--workers", type=int, default=1)
@@ -67,6 +71,7 @@ def collect_shard(job: dict) -> dict:
     args = job["args"]
     rng = random.Random(job["seed"])
     flags = teacher_options(args["teacher"])
+    features = FEATURE_MODULES[args["features"]]
     index = {name: i for i, name in enumerate(MOVE_ACTIONS)}
     player = HybridAgent.load(args["policy"], epsilon=0.02) if args["policy"] else None
 
@@ -86,7 +91,7 @@ def collect_shard(job: dict) -> dict:
                     label = "noop"
                 target = policies.last_target()
                 if is_combat_state(obs) or rng.random() < args["travel_keep"]:
-                    states.append(features2.featurize(obs, previous, aim, target))
+                    states.append(features.featurize(obs, previous, aim, target))
                     actions.append(index[label])
                     aims.append(aim if aim is not None else (0.0, 0.0))
                     sources.append(1 if economy_action(obs) is not None else 0)
@@ -128,7 +133,7 @@ def main() -> None:
     shared = {
         "seed": args.seed, "max_steps": args.max_steps, "step_seconds": args.step_seconds,
         "travel_keep": args.travel_keep, "teacher": args.teacher,
-        "policy": str(args.policy) if args.policy else None,
+        "policy": str(args.policy) if args.policy else None, "features": args.features,
     }
     workers = max(1, args.workers)
     jobs = [{"worker": w, "episodes": plan[w::workers], "seed": args.seed + w, "args": shared}
@@ -144,7 +149,7 @@ def main() -> None:
               ("states", "actions", "aims", "sources", "floors", "bosses")}
     scores = [x for s in shards for x in s["scores"]]
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(args.output, feature_version=features2.FEATURE_VERSION, **merged)
+    np.savez_compressed(args.output, feature_version=args.features, **merged)
     kept = sum(s["kept"] for s in shards)
     dropped = sum(s["dropped"] for s in shards)
     counts = np.bincount(merged["actions"], minlength=len(MOVE_ACTIONS))
