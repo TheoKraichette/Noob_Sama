@@ -807,15 +807,18 @@ inventaire vide, sauvegarde vierge.
 | --- | --- | --- | --- | --- | --- |
 | Aleatoire (40 ep.) | 17.13 | 0.05 | - | 0/40 | 0/40 |
 | Clone phase 4 (`bc_agent_v6`) | 249.49 | 8.9 | 1.049 | 0/80 | 0/80 |
-| **Clone phase 5 (`bc2_agent.json`, V54)** | **636.42 +/- 30.9** | **20.9** | **0.893** | **20/80** | **7/80** |
+| Clone phase 5 (`bc2_agent.json`, V54) | 636.42 +/- 30.9 | 20.9 | 0.893 | 20/80 | 7/80 |
+| Clone phase 5 sans reflexe d'inventaire (ablation) | 430.10 +/- 19.4 | 14.7 | 0.650 | 0/80 | 0/80 |
+| **Clone phase 5 + DAgger (`bc2_agent_d1.json`, V55)** | **660.09 +/- 28.8** | **22.0** | **0.821** | **20/80** | **10/80** |
 | Professeur phase 5 (V51) | 985.67 | 32.0 | 0.209 | 70/80 | 60/80 |
 
-Le clone de la phase 5 fait 2,5 fois le score de celui de la phase 4 et
-remporte les premieres victoires d'un agent appris (7 sur 80, contre 0), a
-37 fois la baseline. Il reste a 65 %% de son professeur en salles et perd
-quatre fois plus de PV par salle : la simulation de deplacement est une
-fonction fine a imiter. La ronde DAgger et l'ablation sont au carnet (V55
-et suivants).
+Le clone de la phase 5 fait 2,6 fois le score de celui de la phase 4 et
+remporte les premieres victoires d'un agent appris (10 sur 80 apres une
+ronde DAgger, contre 0), a 38 fois la baseline. Il reste a 69 %% de son
+professeur en salles et perd quatre fois plus de PV par salle : la
+simulation de deplacement est une fonction fine a imiter. L'ablation
+mesure ce que vaut le reflexe d'inventaire partage avec le professeur :
+sans lui, le meme reseau ne depasse pas l'etage 4 et ne gagne aucune run.
 
 ### Reproduction
 

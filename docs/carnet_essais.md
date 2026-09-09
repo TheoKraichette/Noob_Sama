@@ -980,6 +980,51 @@ que le professeur voit reellement quand il choisit son pas - pour chacun
 des dix-sept deplacements, le verdict de la simulation sur le prochain
 0,6 s - comme la phase 3 avait donne le champ de danger.
 
+### V55 - une ronde DAgger, et l'ablation du reflexe d'inventaire
+
+**DAgger.** Le clone joue 100 episodes (memes etages de depart que la
+collecte, autres seeds), le professeur etiquette chaque etat : 168 925
+paires de plus, sur les situations que le clone atteint reellement.
+Re-entrainement a chaud depuis `bc2_agent` (8 epoques, pas 3e-4) sur les
+deux jeux reunis : precision de validation 0.738 -> **0.760**.
+
+| Agent | Score | Salles / ep. | PV / salle [IC 95 %%] | Etage 5 | Victoires | Figees |
+| --- | --- | --- | --- | --- | --- | --- |
+| Clone v2 (V54) | 636.42 | 20.9 | 0.893 [0.835, 0.951] | 20/80 | 7/80 | 9 |
+| **Clone v2 + DAgger (V55, `bc2_agent_d1`)** | **660.09** | **22.0** | **0.821 [0.764, 0.883]** | 20/80 | **10/80** | 5 |
+
+Difference appariee : PV par salle -0.072, intervalle [-0.155, +0.008] -
+il frole zero ; +24 points, +1.1 salle, +3 victoires, meilleur sur 42
+donjons sur 80, et quatre runs figees de moins. Legerement positif,
+**retenu** comme clone de reference, sans illusion : la ronde ne comble
+pas l'ecart avec le professeur (0.82 PV par salle contre 0.21).
+
+**Ablation.** Le meme reseau (V54) joue sans le reflexe d'inventaire : il
+doit lui-meme marcher vers les piedestaux, presser E, acheter, prendre le
+portail.
+
+| Agent | Score | Salles / ep. | PV / salle | Etage 5 | Victoires |
+| --- | --- | --- | --- | --- | --- |
+| Clone v2 avec ses deux reflexes (V54) | 636.42 | 20.9 | 0.893 | 20/80 | 7/80 |
+| Clone v2 sans reflexe d'inventaire | 430.10 | 14.7 | 0.650 | 0/80 | 0/80 |
+
+Sans le reflexe, le reseau atteint encore l'etage 4 (11 runs) mais jamais
+le 5 et ne gagne rien : il rate les reliques et arrive au duo de gardiens
+avec un build trop faible. Ses PV par salle sont plus bas parce qu'il
+meurt plus tot, la ou les salles coutent moins. Le reflexe d'inventaire
+vaut donc environ 200 points et toutes les victoires ; la visee a la
+souris n'a pas d'ablation propre (le reseau n'a pas de sortie de visee),
+mais V45 -> V46 en donne l'ordre de grandeur sur le professeur.
+
+**Ou est l'ecart.** Le clone reproduit 76 %% des pas du professeur, et ce
+sont les autres qui coutent : le professeur decide son deplacement par une
+simulation des 0,6 s suivantes que le reseau doit reconstituer depuis les
+positions et les vitesses. La phase 3 avait resolu un probleme du meme
+genre en donnant au reseau le champ de danger plutot qu'en lui demandant
+de le deviner. Prochain essai, dans le meme esprit : ajouter aux features
+le verdict de la simulation pour chacun des dix-sept deplacements (touche
+ou non, dans combien de temps, degagement), et re-cloner.
+
 ## Limites connues
 
 - Les donjons ne sont pas seedables, donc les evaluations courtes restent
