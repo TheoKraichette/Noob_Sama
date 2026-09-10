@@ -494,7 +494,7 @@ Il n'a pas gagne. Les metriques de jeu du meme fichier :
 | Clone V33 | 181.42 | **137** | **10** | 2/20 | **3.19** |
 | RL V34 | 198.04 | 97 | 5 | **13/20** | 0.70 |
 
-L'agent RL nettoie **30 %% de salles en moins** et franchit deux fois moins
+L'agent RL nettoie **30 % de salles en moins** et franchit deux fois moins
 d'etages, tout en marquant plus. Il a appris a survivre sans jouer : sa
 recompense d'entrainement penalise les degats (-1.5 par point de vie) et paie
 peu la salle (+1 apres mise a l'echelle), donc l'optimum est d'eviter tout
@@ -701,14 +701,14 @@ aucun episode fige.
 
 Le point de depart est l'audit de 40 episodes du professeur de la phase 4
 (`reports/death_audit_v44_life.csv`), lu autrement : sur 420 PV perdus,
-**47 %% le sont au corps a corps pur** (aucun projectile, aucune zone a
+**47 % le sont au corps a corps pur** (aucun projectile, aucune zone a
 l'ecran) et **164 PV le sont avec un seul ennemi present**. Le deuxieme
 tueur du jeu est l'Ame errante, l'ennemi le plus lent du bestiaire (125 px/s
 contre 290 pour le heros). Le dernier coup d'une run tombe au step median
 ~1 900 sur un budget de 9 000 : les runs meurent tot, le budget est inutilise.
 
 La cause n'est pas l'esquive mais la visee. Le clavier tire sur huit rayons,
-donc seuls 41 %% des tirs pouvaient toucher (V37-V39), et les regles font
+donc seuls 41 % des tirs pouvaient toucher (V37-V39), et les regles font
 marcher le heros autour de sa cible pour l'aligner sur un rayon : il se
 rapproche, tue deux fois moins vite, et se fait toucher par des ennemis
 qu'il devrait tenir a distance sans effort.
@@ -734,7 +734,7 @@ Trois choses changent avant le premier essai.
    et `compare_paired.py` mesure la difference donjon par donjon.
    L'audit compte enfin le coup fatal (il s'arretait a l'etat `play`, donc
    un coup avant chaque mort) et imprime les **PV perdus par salle pooles**
-   (somme des PV sur somme des salles) avec un intervalle a 95 %% par
+   (somme des PV sur somme des salles) avec un intervalle a 95 % par
    bootstrap sur les episodes. Une politique est adoptee si cet intervalle
    exclut zero et si les salles par episode ne reculent pas.
 
@@ -749,7 +749,7 @@ Le professeur de la phase 4 et le clone retenu (`bc_agent_v6`, dont les
 trois features de valeur d'objet ajoutees apres son entrainement sont
 neutralisees par des poids nuls) sont mesures sur les seeds 1000 a 1079.
 
-| Politique | Score | Salles | Etages | PV / salle [IC 95 %%] | Etage atteint 1:2:3:4:5 | Victoires |
+| Politique | Score | Salles | Etages | PV / salle [IC 95 %] | Etage atteint 1:2:3:4:5 | Victoires |
 | --- | --- | --- | --- | --- | --- | --- |
 | Professeur ph. 4 | 358.81 +/- 23.85 | 978 | 112 | **1.032** [0.963, 1.108] | 8:45:17:7:3 | 2/80 |
 | Clone v6 | 249.49 +/- 11.86 | 711 | 75 | **1.049** [0.996, 1.106] | 12:62:5:1:0 | 0/80 |
@@ -770,7 +770,7 @@ Aucune anticipation, aucun changement de cible ni de deplacement - les
 regles marchent encore autour de leur cible pour « s'aligner », ce qui ne
 sert plus a rien.
 
-| Politique | Score | Salles / ep. | Etages / ep. | PV / salle [IC 95 %%] | Etage atteint 1:2:3:4:5 | Victoires |
+| Politique | Score | Salles / ep. | Etages / ep. | PV / salle [IC 95 %] | Etage atteint 1:2:3:4:5 | Victoires |
 | --- | --- | --- | --- | --- | --- | --- |
 | V45 professeur ph. 4 | 358.81 | 12.2 | 1.40 | 1.032 [0.963, 1.108] | 8:45:17:7:3 | 2/80 |
 | **V46 souris** | **552.42** | **18.4** | **2.24** | **0.836 [0.758, 0.917]** | 2:17:32:18:11 | **7/80** |
@@ -781,7 +781,7 @@ intervalle [-0.305, -0.093]. Le candidat marque plus sur 58 donjons sur 80.
 **Adopte.** Les PV perdus par run montent pourtant (12.6 -> 15.4) parce que
 les runs vont plus loin : 733 PV sont perdus aux etages 3 a 5 contre 263
 avant, la ou le contact coute un coeur. La repartition par tueur change de
-nature : les projectiles passent de 32 %% a 36 %% des PV, l'Ame errante tombe
+nature : les projectiles passent de 32 % a 36 % des PV, l'Ame errante tombe
 de 113 a 85, et les gardiens profonds apparaissent (`magmaWake` 38,
 `tidalPulse` 16, `sweepBeam` 11). Quatre runs se figent dans une salle
 nettoyee (deux au point zero) : la salle est vide, les portes ouvertes, le
@@ -793,7 +793,7 @@ duree de survie expose davantage.
 Les trois essais suivants s'appuient sur le meme protocole (80 donjons
 apparies, difference mesuree donjon par donjon) :
 
-| Essai | Score | Salles / ep. | PV / salle [IC 95 %%] | Victoires | Figees | Verdict |
+| Essai | Score | Salles / ep. | PV / salle [IC 95 %] | Victoires | Figees | Verdict |
 | --- | --- | --- | --- | --- | --- | --- |
 | V46 souris | 552.42 | 18.4 | 0.836 [0.758, 0.917] | 7/80 | 4 | reference |
 | V47 zone morte 24 -> 6 px pres d'une cible | 541.87 | 18.0 | 0.861 [0.794, 0.934] | 6/80 | 5 | neutre (diff +0.025, IC [-0.073, +0.125]) |
@@ -846,7 +846,7 @@ points quand une marche suffit (V27). La securite est une contrainte,
 jamais un objectif : maximiser le degagement (V41-V42) envoyait le heros
 dans les coins. Le tir part a la souris a chaque pas, dashs compris.
 
-| Politique | Score | Salles / ep. | Etages / ep. | PV / salle [IC 95 %%] | Etage atteint 3:4:5 | Victoires |
+| Politique | Score | Salles / ep. | Etages / ep. | PV / salle [IC 95 %] | Etage atteint 3:4:5 | Victoires |
 | --- | --- | --- | --- | --- | --- | --- |
 | V49 | 515.06 | 17.2 | 2.17 | 0.864 [0.794, 0.938] | 41:16:7 | 5/80 |
 | **V50 mover** | **992.23 +/- 15.87** | **32.2** | **3.84** | **0.211 [0.184, 0.239]** | 5:3:72 | **64/80** |
@@ -888,7 +888,7 @@ jamais. Le heros ne pouvait plus attendre une piece ni tenir une position ;
 en V50, les deplacements hors combat contournaient la simulation, ce qui
 masquait le defaut. Corrige en une ligne (`mover._simulate`).
 
-| Essai | Score | Salles / ep. | PV / salle [IC 95 %%] | Victoires | Figees |
+| Essai | Score | Salles / ep. | PV / salle [IC 95 %] | Victoires | Figees |
 | --- | --- | --- | --- | --- | --- |
 | V50 mover | 992.23 | 32.2 | 0.211 [0.184, 0.239] | 64/80 | 7 |
 | V51 corrections (bug) | 914.15 | 29.0 | 0.170 [0.142, 0.203] | 45/80 | 23 |
@@ -901,7 +901,7 @@ chose de mesurable sur ces 80 donjons.
 
 ### V52 et V53 - la table des gardiens et l'economie de build : neutres
 
-| Essai | Score | PV / salle [IC 95 %%] | Victoires | Morts | Figees | Difference appariee (PV / salle) |
+| Essai | Score | PV / salle [IC 95 %] | Victoires | Morts | Figees | Difference appariee (PV / salle) |
 | --- | --- | --- | --- | --- | --- | --- |
 | V51b | 985.67 | 0.209 [0.185, 0.235] | 60/80 | 13 | 6 | reference |
 | V52 + table des gardiens | 963.20 | 0.181 [0.156, 0.209] | 59/80 | 15 | 7 | -0.027, IC [-0.057, +0.003] |
@@ -926,7 +926,7 @@ Toutes les mesures precedentes tournent sur les seeds 1000 a 1079, et les
 corrections de blocage ont ete concues en regardant ces donjons-la. Le
 professeur gele est donc rejoue sur les seeds **2000 a 2079** :
 
-| Donjons | Score | Salles / ep. | PV / salle [IC 95 %%] | Etage 5 atteint | Victoires | Figees |
+| Donjons | Score | Salles / ep. | PV / salle [IC 95 %] | Etage 5 atteint | Victoires | Figees |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1000-1079 (mesure) | 985.67 | 32.0 | 0.209 [0.185, 0.235] | 70/80 | 60/80 | 6 |
 | 2000-2079 (jamais vus) | 1007.30 | 32.5 | 0.175 [0.150, 0.203] | 72/80 | 60/80 | 4 |
@@ -942,7 +942,7 @@ un donjon par episode, autres seeds que ceux de la mesure) : **1 203 849
 paires** de 439 features, dont 63 713 aux etats que le reflexe
 d'inventaire prend en charge et 454 800 dans une salle de gardien. Le
 reseau a deux tetes (384x384, direction + modificateur), les paires sont
-ponderees par classe (dash, competence, E sont 0,9 %% des etiquettes) et
+ponderees par classe (dash, competence, E sont 0,9 % des etiquettes) et
 par etat (x3 chez un gardien, x2 aux etages 3+, x0,5 aux etats du
 reflexe), avec lissage 0,05 et decroissance des poids 1e-4. Trente
 epoques, une par 4 a 6 minutes, precision de validation **0.738** (0.658
@@ -954,7 +954,7 @@ Evaluation en agent hybride (`audit_deaths.py --policy hybrid:`, epsilon
 0) : le reseau pilote, les reflexes de visee et d'inventaire sont ceux du
 professeur.
 
-| Agent | Score | Salles / ep. | Etages / ep. | PV / salle [IC 95 %%] | Etage 5 atteint | Victoires |
+| Agent | Score | Salles / ep. | Etages / ep. | PV / salle [IC 95 %] | Etage 5 atteint | Victoires |
 | --- | --- | --- | --- | --- | --- | --- |
 | Clone phase 4 (`bc_agent_v6`, V45) | 249.49 | 8.9 | 0.94 | 1.049 [0.996, 1.106] | 0/80 | 0/80 |
 | **Clone phase 5 (`bc2_agent`)** | **636.42 +/- 30.90** | **20.9** | **2.48** | **0.893 [0.835, 0.951]** | **20/80** | **7/80** |
@@ -964,10 +964,10 @@ Contre le clone de la phase 4 : 2,5 fois le score, 2,3 fois les salles,
 et les **premieres victoires d'un agent appris** (7, dont une a 1 120
 points). Contre son professeur, apparie : -349 points, -11 salles, PV par
 salle +0.684 (intervalle [+0.622, +0.743]), 7 donjons sur 80 ou il fait
-mieux. Le clone est a 65 %% du professeur en score et en salles, mais a
+mieux. Le clone est a 65 % du professeur en score et en salles, mais a
 quatre fois ses PV perdus par salle : il tient les etages 1-2 (11 morts),
 meurt aux etages 3-4 (43 morts) et arrive vingt fois a l'etage 5. Ses
-tueurs sont ceux du professeur de la phase 4 - les projectiles (35 %% des
+tueurs sont ceux du professeur de la phase 4 - les projectiles (35 % des
 PV), la charge lourde et le triple bond de Vorace - c'est-a-dire
 exactement ce que la simulation de deplacement esquive et que le reseau
 n'a qu'imparfaitement appris. Neuf runs epuisent leur budget, dont une
@@ -988,7 +988,7 @@ paires de plus, sur les situations que le clone atteint reellement.
 Re-entrainement a chaud depuis `bc2_agent` (8 epoques, pas 3e-4) sur les
 deux jeux reunis : precision de validation 0.738 -> **0.760**.
 
-| Agent | Score | Salles / ep. | PV / salle [IC 95 %%] | Etage 5 | Victoires | Figees |
+| Agent | Score | Salles / ep. | PV / salle [IC 95 %] | Etage 5 | Victoires | Figees |
 | --- | --- | --- | --- | --- | --- | --- |
 | Clone v2 (V54) | 636.42 | 20.9 | 0.893 [0.835, 0.951] | 20/80 | 7/80 | 9 |
 | **Clone v2 + DAgger (V55, `bc2_agent_d1`)** | **660.09** | **22.0** | **0.821 [0.764, 0.883]** | 20/80 | **10/80** | 5 |
@@ -1016,7 +1016,7 @@ vaut donc environ 200 points et toutes les victoires ; la visee a la
 souris n'a pas d'ablation propre (le reseau n'a pas de sortie de visee),
 mais V45 -> V46 en donne l'ordre de grandeur sur le professeur.
 
-**Ou est l'ecart.** Le clone reproduit 76 %% des pas du professeur, et ce
+**Ou est l'ecart.** Le clone reproduit 76 % des pas du professeur, et ce
 sont les autres qui coutent : le professeur decide son deplacement par une
 simulation des 0,6 s suivantes que le reseau doit reconstituer depuis les
 positions et les vitesses. La phase 3 avait resolu un probleme du meme
@@ -1025,29 +1025,107 @@ de le deviner. Prochain essai, dans le meme esprit : ajouter aux features
 le verdict de la simulation pour chacun des dix-sept deplacements (touche
 ou non, dans combien de temps, degagement), et re-cloner.
 
+### V56 - donner au reseau ce que le professeur simule
+
+Le professeur choisit son pas en simulant les 0,6 s suivantes pour chacun
+des dix-sept deplacements que le clavier autorise (`src/mover.py`). Le
+clone, lui, ne recevait que des positions et des vitesses : il devait
+refaire cette simulation de tete. `src/features3.py` la lui donne - pour
+chaque deplacement, quatre nombres : touche ou non, dans combien de temps,
+quel degagement il garde, quelle distance a sa cible - soit **507
+features** au lieu de 439. Le module de features est choisi par le champ
+`feature_version` du modele, donc les clones v2 restent rechargeables.
+
+Meme collecte que V54, aux memes seeds : les 1 203 849 memes paires, seul
+le vecteur d'observation change. Vingt-deux epoques, precision de
+validation 0.738 -> **0.772**.
+
+| Agent | Score | Salles / ep. | PV / salle [IC 95 %] | Etage 5 | Victoires | Figees |
+| --- | --- | --- | --- | --- | --- | --- |
+| Clone v2 + DAgger (V55) | 660.09 | 22.0 | 0.821 [0.764, 0.883] | 20/80 | 10/80 | 5 |
+| Clone v3 (V56, `bc3_agent`) | 740.17 | 23.0 | **0.254 [0.219, 0.290]** | 39/80 | 35/80 | **38** |
+
+C'est le plus gros effet mesure depuis le debut de la phase : les PV
+perdus par salle passent de 0.821 a 0.254, difference appariee -0.567,
+intervalle [-0.635, -0.501]. Le clone ne prend presque plus de coups, et
+gagne trente-cinq donjons contre dix.
+
+Mais **trente-huit runs sur quatre-vingts restent bloquees** plus de 1 500
+pas sans nettoyer une salle, trente-six epuisent leur budget sans mourir -
+six d'entre elles dans la salle de depart de l'etage 1 - et la mediane du
+plus long blocage passe de 450 a 1 386 pas. Le verdict de la simulation
+rend le reseau prudent au point de l'immobiliser : quand aucun deplacement
+n'est sur, il n'en prend aucun. Une bonne part des 740 points est du temps
+de survie paye (`time * 0.1`), la pathologie deja rencontree en V10, V30
+et V34. Le gain est reel, mais l'essai ne s'adopte pas tel quel.
+
+### V57 - la ronde DAgger qui remet le clone en marche
+
+Le clone v3 joue 100 episodes, le professeur etiquette chaque etat :
+**372 815 paires**, deux fois plus qu'a la ronde precedente - un clone qui
+s'attarde produit plus de pas. Re-entrainement a chaud depuis `bc3_agent`,
+huit epoques a 3e-4 sur les deux jeux reunis : precision de validation
+0.772 -> **0.766**. Elle baisse pendant que le jeu s'ameliore, ce qui est
+attendu : les etats ajoutes sont ceux ou le clone s'enlisait.
+
+| Agent | Score | Salles / ep. | Etages / ep. | PV / salle [IC 95 %] | Etage 5 | Victoires | Figees |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Clone v2 + DAgger (V55) | 660.09 | 22.0 | 2.61 | 0.821 [0.764, 0.883] | 20/80 | 10/80 | 5 |
+| Clone v3 (V56) | 740.17 | 23.0 | 2.65 | 0.254 [0.219, 0.290] | 39/80 | 35/80 | 38 |
+| **Clone v3 + DAgger (V57, `bc3_agent_d1`)** | **921.36 +/- 24.62** | **29.5** | **3.52** | **0.292 [0.261, 0.329]** | **58/80** | **49/80** | **12** |
+| Professeur gele (V51b) | 985.67 | 32.0 | 3.77 | 0.209 [0.185, 0.235] | 70/80 | 60/80 | 6 |
+
+Difference appariee V56 -> V57 : +181.2 points (err. 45.3), +6.5 salles,
++0.88 etage, +45 kills, toutes reelles. Les blocages tombent de 38 a 12 et
+les PV par salle ne remontent qu'a peine - 0.254 -> 0.292, intervalle
+[-0.010, +0.090], neutre : le reseau ne redevient pas imprudent, il se
+remet en marche. **Quarante-neuf victoires sur quatre-vingts.**
+
+Face au professeur gele, sur les memes donjons : -64.3 points, -2.5
+salles, -0.25 etage, +0.083 PV par salle [+0.042, +0.126], et le clone
+marque plus haut sur 29 donjons sur 80. Il est a **93 % de son professeur
+en score, 92 % en salles, 82 % de ses victoires**. Le plafond de 76 % que
+ni deux rondes DAgger ni un reseau 512x512 n'avaient su lever tenait donc
+a une information absente du vecteur d'observation, pas a la capacite du
+reseau ni au nombre de demonstrations. C'est la meme lecon qu'a la phase 3
+avec le champ de danger, et elle a mis deux phases a etre reapprise.
+
+**Retenu : `models/bc3_agent_d1.json`**, clone de reference du projet.
+
+Ce qui reste. Dix-sept runs epuisent leur budget : huit en salle de combat,
+quatre en boutique - le clone s'attarde devant l'etal, un etat rare dans
+les demonstrations. Les projectiles font toujours 34 % des PV perdus,
+l'eruption tellurique 20 %. Et les PV se perdent desormais aux etages 3 a 5
+(278 des 396), c'est-a-dire la ou l'agent va maintenant.
+
 ## Limites connues
 
-- Les donjons ne sont pas seedables, donc les evaluations courtes restent
-  bruitees.
 - Le score de comparaison paie le temps de survie (`time * 0.1`). Il est
   conserve tel quel - le changer obligerait a re-mesurer tout l'historique -
-  mais il ne suffit pas a lui seul a classer deux politiques : salles et
-  etages accompagnent desormais chaque chiffre.
-- Les modeles des phases 2 et 3 ne sont plus rechargeables : l'observation
-  est passee de 109 a 202 puis 212 dimensions, et l'espace d'actions de 59 a
-  64 puis 96. Leurs resultats restent au carnet, mais la demonstration
-  rejouable est celle de la phase 4.
-- **Quarante episodes ne suffisent pas non plus** a departager deux politiques
-  proches : le meme modele mesure deux fois donne 278.07 puis 251.57. Les
-  decisions de la phase 4 s'appuient donc sur les PV perdus par salle, qui
-  comptent des centaines d'evenements au lieu de quarante.
-- Le clone plafonne a 76 %% de son professeur, et ce plafond n'a bouge ni avec
-  deux rondes DAgger ni avec un reseau 512x512.
-- L'attrition reste le mur : 0.84 PV par salle pour le professeur, quand il en
-  faudrait environ 0.2 pour terminer regulierement 46 salles avec six
-  demi-coeurs.
-- L'evaluation finale est conservee dans `reports/eval_bc_v6.csv` pour relier
-  directement les chiffres finaux au fichier source.
+  mais il ne suffit pas a lui seul a classer deux politiques : salles, etages
+  et blocages accompagnent desormais chaque chiffre. V56 en est le dernier
+  rappel.
+- Les donjons n'ont ete rendus reproductibles qu'a la phase 5. Les essais des
+  phases 1 a 4 se sont donc decides sur 20 a 40 episodes non apparies, ou le
+  meme modele mesure deux fois donnait 278.07 puis 251.57 : ce bruit est dans
+  tous les chiffres anterieurs a V45.
+- Les modeles des phases 2 a 4 ne sont plus rechargeables : l'observation est
+  passee de 109 a 202, 212, 439 puis 507 dimensions, et l'espace d'actions de
+  59 a 64 puis 96. Leurs resultats restent au carnet ; la demonstration
+  rejouable est celle de la phase 5.
+- L'agent est hierarchique et l'annonce : la visee et l'inventaire sont des
+  reflexes ecrits, partages avec le professeur, et c'est le pilotage qui est
+  appris. L'ablation de V55 chiffre le second - environ 200 points et toutes
+  les victoires.
+- L'attrition reste le mur, cote professeur : 0.209 PV par salle, soit une
+  dizaine de PV sur une run complete de 46 salles. La marge est mince, et ses
+  vingt echecs sur quatre-vingts sont la.
+- Le clone reste a 93 % de son professeur en score et a 82 % de ses victoires.
+  L'ecart tenait a une information absente des features jusqu'a V56 ; ce qui
+  en reste n'a pas ete explique.
+- Les evaluations sont conservees dans `reports/` - `eval_bc_v6.csv` pour la
+  phase 4, `death_audit_clone3_v57_dagger*.csv` pour le clone retenu - pour
+  relier chaque chiffre a son fichier source.
 
 ## Pistes avec plus de temps
 

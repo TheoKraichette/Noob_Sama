@@ -480,7 +480,7 @@ Trois trouvailles majeures en sont sorties, detaillees au carnet d'essais :
    projectiles et 6 zones, quand `aftershock` en pose 19 d'un coup).
 2. Les salles de combat profondes contiennent des **piliers** qui arretent
    les tirs. Rien ne les exposait : l'agent tirait dedans, jusqu'a 7 380 steps
-   d'affilee - 82 %% d'un budget d'episode.
+   d'affilee - 82 % d'un budget d'episode.
 3. La politique combattait les elites des salles scellees puis **repartait
    sans la relique**, parce qu'une regle de prudence confondait « declencher
    une epreuve » et « ramasser un butin deja pose ».
@@ -553,7 +553,7 @@ python scripts/baseline_random.py --episodes 20 --max-steps 9000 --seed 42 --tur
 # Ou meurt la politique, et de quoi
 python scripts/audit_deaths.py --policy heuristic --episodes 20 --max-steps 9000
 
-# Collecte (curriculum : 60 %% de runs completes, le reste en profondeur)
+# Collecte (curriculum : 60 % de runs completes, le reste en profondeur)
 python scripts/collect_demos.py --episodes 180 --max-steps 9000 --workers 6 \
     --floors 1 1 1 1 1 1 2 3 4 5 --seed 42 --output data/demos.npz
 python scripts/train_bc.py --demos data/demos.npz --hidden 384 384 --epochs 40 \
@@ -709,10 +709,10 @@ python scripts/watch_dqn.py --agent models/bc_agent_v6.json --episodes 20 \
 
 La phase 4 s'arretait sur un constat : 0.84 PV perdu par salle quand il en
 faudrait environ 0.2 pour finir les 46 salles avec six demi-coeurs. L'audit
-disait ou : **47 %% des PV au corps a corps pur** (aucun projectile, aucune
-zone a l'ecran), 39 %% avec un seul ennemi present, et le deuxieme tueur du
+disait ou : **47 % des PV au corps a corps pur** (aucun projectile, aucune
+zone a l'ecran), 39 % avec un seul ennemi present, et le deuxieme tueur du
 jeu etait l'Ame errante, l'ennemi le plus lent du bestiaire. La cause etait
-la visee : huit rayons clavier, 41 %% des tirs capables de toucher, et des
+la visee : huit rayons clavier, 41 % des tirs capables de toucher, et des
 regles qui font marcher le heros autour de sa cible pour l'aligner - donc
 vers elle.
 
@@ -740,13 +740,13 @@ la meme politique sont identiques pas a pas (verifie sur 1 500 pas, machine
 chargee). Chaque essai se joue sur **80 donjons** (seeds 1000 a 1079) et
 `scripts/compare_paired.py` mesure la difference donjon par donjon ; la
 decision se prend sur les **PV perdus par salle** (somme sur somme, coup
-fatal compris - l'audit l'oubliait) avec un intervalle a 95 %% par
+fatal compris - l'audit l'oubliait) avec un intervalle a 95 % par
 bootstrap. Un essai est adopte si l'intervalle exclut zero et si les salles
 par episode ne reculent pas ; un essai neutre est retire.
 
 ### Le professeur, essai par essai
 
-| Essai | Score | Salles / ep. | PV / salle [IC 95 %%] | Victoires | Verdict |
+| Essai | Score | Salles / ep. | PV / salle [IC 95 %] | Victoires | Verdict |
 | --- | --- | --- | --- | --- | --- |
 | V45 professeur phase 4 | 358.81 | 12.2 | 1.032 [0.963, 1.108] | 2/80 | point zero |
 | V46 visee a la souris | 552.42 | 18.4 | 0.836 [0.758, 0.917] | 7/80 | adopte |
@@ -757,7 +757,7 @@ par episode ne reculent pas ; un essai neutre est retire.
 | **Professeur gele, 80 donjons jamais vus (seeds 2000-2079)** | **1007.30** | **32.5** | **0.175 [0.150, 0.203]** | **60/80** | validation |
 
 Deux essais font tout le chemin. La souris (V46) fait passer les tirs
-capables de toucher de 41 %% a la totalite et double les etages franchis. Le
+capables de toucher de 41 % a la totalite et double les etages franchis. Le
 **deplacement predictif** (V50, `src/mover.py`) remplace les regles
 d'esquive par une simulation : les dix-sept deplacements que le clavier
 permet (immobile, huit marches, huit dashs) sont joues sur 0,6 s a 20 Hz
@@ -798,6 +798,17 @@ reseau (`src/dqn.py`) a **deux tetes**, direction et modificateur (marche,
 dash, competence, E), des poids par classe pour les actions rares et un
 lissage d'etiquettes contre un professeur parfois ambigu.
 
+Ce n'etait pas assez. Le professeur choisit son deplacement en simulant les
+0,6 s suivantes pour chacun des dix-sept mouvements du clavier ; un reseau
+qui ne recoit que des positions et des vitesses doit refaire ce calcul de
+tete, et ce sont ces pas-la qui coutent des coeurs. `src/features3.py`
+ajoute le verdict de cette simulation - pour chaque deplacement : touche ou
+non, dans combien de temps, quel degagement il garde - soit **507
+features**. C'est le changement qui a fait la difference (V56), comme le
+champ de danger a la phase 3. Le module est choisi par le champ
+`feature_version` du modele, donc les clones plus anciens restent
+rechargeables.
+
 ### Resultats
 
 Protocole : 80 episodes x 9 000 steps, seeds 1000 a 1079, etage 1,
@@ -809,16 +820,28 @@ inventaire vide, sauvegarde vierge.
 | Clone phase 4 (`bc_agent_v6`) | 249.49 | 8.9 | 1.049 | 0/80 | 0/80 |
 | Clone phase 5 (`bc2_agent.json`, V54) | 636.42 +/- 30.9 | 20.9 | 0.893 | 20/80 | 7/80 |
 | Clone phase 5 sans reflexe d'inventaire (ablation) | 430.10 +/- 19.4 | 14.7 | 0.650 | 0/80 | 0/80 |
-| **Clone phase 5 + DAgger (`bc2_agent_d1.json`, V55)** | **660.09 +/- 28.8** | **22.0** | **0.821** | **20/80** | **10/80** |
-| Professeur phase 5 (V51) | 985.67 | 32.0 | 0.209 | 70/80 | 60/80 |
+| Clone phase 5 + DAgger (`bc2_agent_d1.json`, V55) | 660.09 +/- 28.8 | 22.0 | 0.821 | 20/80 | 10/80 |
+| Clone features v3 (`bc3_agent.json`, V56) | 740.17 +/- 38.0 | 23.0 | 0.254 | 39/80 | 35/80 |
+| **Clone features v3 + DAgger (`bc3_agent_d1.json`, V57)** | **921.36 +/- 24.6** | **29.5** | **0.292** | **58/80** | **49/80** |
+| Professeur phase 5 (V51) | 985.67 +/- 17.7 | 32.0 | 0.209 | 70/80 | 60/80 |
 
-Le clone de la phase 5 fait 2,6 fois le score de celui de la phase 4 et
-remporte les premieres victoires d'un agent appris (10 sur 80 apres une
-ronde DAgger, contre 0), a 38 fois la baseline. Il reste a 69 %% de son
-professeur en salles et perd quatre fois plus de PV par salle : la
-simulation de deplacement est une fonction fine a imiter. L'ablation
-mesure ce que vaut le reflexe d'inventaire partage avec le professeur :
-sans lui, le meme reseau ne depasse pas l'etage 4 et ne gagne aucune run.
+L'agent retenu est le clone v3 apres une ronde DAgger : **921.36 sur 80
+donjons, 29.5 salles par episode, 3.52 etages et 49 victoires completes sur
+80** - 54 fois la baseline aleatoire du meme protocole, et 3,7 fois le clone
+de la phase 4. Il est a 93 % de son professeur en score, 92 % en salles et
+82 % de ses victoires.
+
+Les deux dernieres lignes se lisent ensemble. Donner au reseau le verdict de
+la simulation (V56) divise par trois ses PV perdus par salle, mais le rend
+prudent au point de s'immobiliser : 36 de ses 80 runs epuisent leur budget
+sans mourir. La ronde DAgger (V57) le remet en marche - +6.5 salles, +0.88
+etage - sans lui rendre son imprudence. C'est aussi pourquoi le score seul
+ne decide rien ici : V56 marque 740 points en restant souvent plante, le
+temps de survie etant paye par `time * 0.1`.
+
+L'ablation mesure ce que vaut le reflexe d'inventaire partage avec le
+professeur : sans lui, le meme reseau ne depasse pas l'etage 4 et ne gagne
+aucune run.
 
 ### Reproduction
 
@@ -840,7 +863,24 @@ python scripts/collect_demos2.py --teacher lead,priority,mover --episodes 300 --
 python scripts/train_bc2.py --demos data/demos2_v1.npz --epochs 30 --output models/bc2_agent.json
 python scripts/audit_deaths.py --policy hybrid:models/bc2_agent.json --episodes 80 --workers 4 \
     --seed 1000 --output reports/death_audit_clone2.csv
-python scripts/watch_agent2.py --agent models/bc2_agent.json --episodes 3 --turbo --headless
+
+# Features v3 : le verdict de la simulation, sur les memes demonstrations
+python scripts/collect_demos2.py --teacher lead,priority,mover --episodes 300 --workers 6 \
+    --floors 1 1 2 3 4 5 4 5 --seed 42 --features v3 --output data/demos3_v1.npz
+python scripts/train_bc2.py --demos data/demos3_v1.npz --epochs 30 --output models/bc3_agent.json
+
+# Ronde DAgger : le clone joue, le professeur etiquette, re-entrainement a chaud
+python scripts/collect_demos2.py --policy models/bc3_agent.json --teacher lead,priority,mover \
+    --episodes 100 --workers 6 --floors 1 1 2 3 4 5 4 5 --seed 77 --features v3 \
+    --output data/dagger3_v1.npz
+python scripts/train_bc2.py --demos data/demos3_v1.npz data/dagger3_v1.npz --epochs 8 --lr 3e-4 \
+    --init models/bc3_agent.json --output models/bc3_agent_d1.json
+
+# Evaluation au protocole, puis comparaison appariee avec le professeur
+python scripts/audit_deaths.py --policy hybrid:models/bc3_agent_d1.json --episodes 80 --workers 4 \
+    --seed 1000 --output reports/death_audit_clone3_v57_dagger.csv
+python scripts/compare_paired.py reports/death_audit_clone3_v57_dagger_episodes.csv \
+    reports/death_audit_v51b_unstall_episodes.csv
 ```
 
 ## Demo de l'agent entraine
@@ -849,22 +889,33 @@ L'agent se recharge depuis un script neuf, sans relancer l'entrainement, et
 joue dans un navigateur visible :
 
 ```bash
-# Agent phase 4 (clone retenu, recommande pour la demo)
+# Agent retenu (phase 5, clone v3 + DAgger) - recommande pour la demo
+python scripts/watch_agent2.py --agent models/bc3_agent_d1.json --episodes 3
+
+# Le meme en turbo, pour mesurer plutot que regarder
+python scripts/watch_agent2.py --agent models/bc3_agent_d1.json --episodes 3 --turbo --headless
+
+# Agent phase 4 (clone precedent)
 python scripts/watch_dqn.py --episodes 3 --max-steps 9000
 
 # Agent phase 1 (Q-learning tabulaire)
 python scripts/watch_agent.py --episodes 3
 ```
 
+`watch_agent2.py` ne connait pas l'entrainement : il lit le JSON, choisit le
+module de features d'apres le champ `feature_version` qu'il y trouve, et joue.
+Il affiche la configuration rechargee avant le premier episode
+(`features=507 (v3) actions=20 heads=True`).
+
 Les poids ne sont pas versionnes (la consigne interdit de commiter des
-donnees ou des modeles) : `models/bc_agent_v6.json` se regenere avec les
-commandes de reproduction de la phase 4, en environ deux heures dont
+donnees ou des modeles) : `models/bc3_agent_d1.json` se regenere avec les
+commandes de reproduction de la phase 5, en environ trois heures dont
 l'essentiel en collecte.
 
-Note : les modeles des phases 2 et 3 ne sont plus rechargeables. L'observation
-est passee de 109 a 202 puis 212 dimensions, et l'espace d'actions de 59 a 64
-puis 96 ; leurs resultats restent au carnet d'essais, mais la demonstration
-rejouable est celle de la phase 4.
+Note : les modeles des phases 2 a 4 ne sont plus rechargeables. L'observation
+est passee de 109 a 202, 212, 439 puis 507 dimensions, et l'espace d'actions
+de 59 a 64 puis 96 ; leurs resultats restent au carnet d'essais, mais la
+demonstration rejouable est celle de la phase 5.
 
 ## Video de restitution
 
@@ -881,17 +932,26 @@ Plan conseille pour la video de 10 a 15 minutes :
    le contrat d'honnetete (sauvegarde vierge, evaluation depuis l'etage 1).
 4. Expliquer le pipeline : professeur heuristique -> clonage -> DAgger, et
    pourquoi l'audit des morts pilote chaque decision.
-5. Le coeur de la demonstration : les deux mesures de la phase 4. Le tir n'a
-   lieu que 68 %% du temps parce que l'espace d'actions etait incomplet, et
-   seuls 26 %% des tirs peuvent geometriquement toucher parce que la visee
-   clavier n'a que huit rayons. Montrer le calcul `r x sin(22.5 deg)`.
-6. Montrer la courbe `reports/progression_curve.svg` et le tableau
-   comparatif.
-7. Montrer une demo avec `python scripts/watch_dqn.py --episodes 3 --max-steps 9000`.
-8. Presenter trois echecs instructifs du carnet : V29 (un defaut evident qui
-   n'en etait pas un, -33 %% de score), V34 (la passe RL qui ameliore le score
-   en nettoyant 30 %% de salles en moins) et V42-V44 (la precision d'imitation
-   monte de 81.7 a 84.1 %% sans que le jeu bouge).
+5. Le coeur de la demonstration : ce qui a debloque chaque phase, en montrant
+   a chaque fois la mesure qui l'a designe. Phase 4, la visee : le tir n'a lieu
+   que 68 % du temps parce que l'espace d'actions etait incomplet, et seuls
+   26 % des tirs peuvent geometriquement toucher parce que la visee clavier
+   n'a que huit rayons (calcul `r x sin(22.5 deg)`). Phase 5, l'ecart entre le
+   clone et son professeur : il tenait a une information absente du vecteur
+   d'observation - le verdict de la simulation de deplacement - et non a la
+   taille du reseau ni au nombre de demonstrations (V56).
+6. Montrer la courbe `reports/progression_curve.svg` et le tableau comparatif,
+   de la baseline (17.13) au clone retenu (921.36, 49 victoires sur 80).
+7. Montrer une demo avec
+   `python scripts/watch_agent2.py --agent models/bc3_agent_d1.json --episodes 3`,
+   et dire ce qui est appris (le pilotage) et ce qui ne l'est pas (visee et
+   inventaire, reflexes partages avec le professeur, chiffres de l'ablation
+   V55 a l'appui).
+8. Presenter quatre echecs instructifs du carnet : V29 (un defaut evident qui
+   n'en etait pas un, -33 % de score), V34 (la passe RL qui ameliore le score
+   en nettoyant 30 % de salles en moins), V42-V44 (la precision d'imitation
+   monte de 81.7 a 84.1 % sans que le jeu bouge) et V56 (le clone cesse de
+   prendre des coups... en cessant d'avancer : 36 runs sur 80 figees).
 9. Conclure sur les limites et ce qui serait fait avec plus de temps.
 
 ## Essais et difficultes (pour le carnet d'essais)
