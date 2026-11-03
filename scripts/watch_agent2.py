@@ -43,6 +43,12 @@ def parse_args() -> argparse.Namespace:
         "is drawn at a human pace. Default: the step length itself.",
     )
     parser.add_argument("--turbo", action="store_true")
+    parser.add_argument(
+        "--smooth", action="store_true",
+        help="With --turbo and a window: draw every simulated frame at "
+        "real-time pace instead of one image per step. Same simulation, "
+        "fluid display.",
+    )
     parser.add_argument("--epsilon", type=float, default=0.0)
     parser.add_argument("--seed", type=int, default=-1, help="Dungeon seed of episode 1 (-1: the game's clock).")
     parser.add_argument("--output", type=Path, default=None, help="CSV, one row per episode.")
@@ -55,8 +61,9 @@ def main() -> None:
     print(f"agent={args.agent} features={agent.net.n_features} ({agent.net.feature_version}) "
           f"actions={len(agent.net.actions)} heads={agent.net.heads}")
     rows = []
+    smooth = args.smooth and args.turbo and not args.headless
     pace = args.pace if args.pace is not None else (args.step_seconds if args.turbo and not args.headless else 0.0)
-    with EclipseEnv(headless=args.headless, turbo=args.turbo, step_seconds=args.step_seconds) as env:
+    with EclipseEnv(headless=args.headless, turbo=args.turbo, step_seconds=args.step_seconds, smooth=smooth) as env:
         for episode in range(1, args.episodes + 1):
             seed = args.seed + episode - 1 if args.seed >= 0 else None
             obs = env.reset(seed=seed)
@@ -67,12 +74,14 @@ def main() -> None:
             steps = 0
             started = time.time()
             while not done and steps < args.max_steps:
+                step_started = time.time()
                 action, aim, _info = agent.act(obs, previous)
                 previous = obs
                 obs, _reward, done, _ = env.step(action, aim)
                 steps += 1
                 if pace:
-                    time.sleep(pace)
+                    # Only the remainder: a smooth step already holds the pace.
+                    time.sleep(max(0.0, pace - (time.time() - step_started)))
             row = {
                 "episode": episode, "seed": seed if seed is not None else "", "steps": steps,
                 "done": done, "won": obs.state == "victory", "score": round(env.get_score(), 3),

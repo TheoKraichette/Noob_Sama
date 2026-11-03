@@ -889,11 +889,15 @@ L'agent se recharge depuis un script neuf, sans relancer l'entrainement, et
 joue dans un navigateur visible :
 
 ```bash
-# Agent retenu (phase 5, clone v3 + DAgger) - recommande pour la demo
-python scripts/watch_agent2.py --agent models/bc3_agent_d1.json --episodes 3
+# Agent retenu (phase 5, clone v3 + DAgger) - recommande pour la demo :
+# la simulation des mesures, dessinee image par image au rythme du temps reel
+python scripts/watch_agent2.py --agent models/bc3_agent_d1.json --episodes 3 --turbo --smooth
 
 # Le meme en turbo, pour mesurer plutot que regarder
 python scripts/watch_agent2.py --agent models/bc3_agent_d1.json --episodes 3 --turbo --headless
+
+# Le meme en temps reel, par la boucle d'animation du jeu lui-meme
+python scripts/watch_agent2.py --agent models/bc3_agent_d1.json --episodes 3
 
 # Agent phase 4 (clone precedent)
 python scripts/watch_dqn.py --episodes 3 --max-steps 9000
@@ -901,6 +905,27 @@ python scripts/watch_dqn.py --episodes 3 --max-steps 9000
 # Agent phase 1 (Q-learning tabulaire)
 python scripts/watch_agent.py --episodes 3
 ```
+
+Trois facons de regarder. En temps reel (sans `--turbo`), le jeu tourne sa
+propre boucle d'animation et les touches passent par le navigateur avec une
+latence variable : l'affichage est fluide mais la politique joue moins bien
+que dans les mesures. En `--turbo`, chaque pas avance 18 frames de
+simulation d'un coup puis dessine une seule image : c'est la simulation
+exacte des mesures, mais vue a 7 images par seconde, le heros saute de
+43 px entre deux images. `--turbo --smooth` garde ces 18 frames et les
+dessine une par une, au rythme que l'ecran permet, avec un pas tenu a
+0,15 s : memes decisions, meme partie, affichage fluide. Verifie sur la
+graine 1021 : 600 pas joues en headless, en fenetre turbo et en fenetre
+fluide donnent la meme trajectoire au pas pres (position, PV, kills,
+salles), a 0,167 s par pas et 10,8 images par pas en fluide sur un ecran
+60 Hz.
+
+Pour que cette egalite tienne, le rendu ne tire plus dans les des du
+combat : le dessin consomme `Math.random` (etincelle de la meche du
+bombardier, tuile de grain au premier affichage), ce qui decalait les
+tirages d'une partie regardee par rapport a la meme partie headless. Le
+rendu a desormais son propre generateur, isole dans `__eosRender`.
+`watch_teacher.py` accepte les memes options.
 
 `watch_agent2.py` ne connait pas l'entrainement : il lit le JSON, choisit le
 module de features d'apres le champ `feature_version` qu'il y trouve, et joue.

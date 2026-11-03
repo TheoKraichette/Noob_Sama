@@ -705,8 +705,10 @@ window.__eosObserve = () => {
 
 # One synchronous env step: press the keys, advance the fixed-step
 # simulation, release, optionally draw, and read the new state — a single
-# browser round-trip instead of key events plus a real-time sleep.
-STEP_TURBO_JS = """({ codes, frames, render, aim }) => {
+# browser round-trip instead of key events plus a real-time sleep. With a
+# frame pace (smooth watching) the same frames are drawn one by one at the
+# display's rate instead of once at the end of the step.
+STEP_TURBO_JS = """async ({ codes, frames, render, aim, frameMs }) => {
     // Mouse aim: the game fires toward the cursor while the button is held
     // and no arrow key is down (player.js). A far point keeps the direction
     // stable over the 43 px the hero can cover during one step. Only in
@@ -720,13 +722,56 @@ STEP_TURBO_JS = """({ codes, frames, render, aim }) => {
     } else {
         m.down = false;
     }
+    const smooth = render && frameMs > 0 && !document.hidden;
     for (const code of codes) window.dispatchEvent(new KeyboardEvent('keydown', { code }));
-    window.__eosAdvance(frames, 1 / 120);
+    if (smooth) await window.__eosAdvanceSmooth(frames, 1 / 120, frameMs);
+    else window.__eosAdvance(frames, 1 / 120);
     for (const code of codes) window.dispatchEvent(new KeyboardEvent('keyup', { code }));
     m.down = false;
-    if (render) window.__eosRender();
+    if (render && !smooth) window.__eosRender();
     return window.__eosObserve();
 }"""
+
+
+# Drawing hooks spliced into main.js next to __eosAdvance. The renderer
+# draws a few random sparks (bomber fuse, grain tile), so it gets its own
+# dice: a watched run then plays exactly the frames of a headless one.
+# __eosAdvanceSmooth runs the same frames as __eosAdvance (one frameEnd at
+# the end, same hitstop) but draws between them as the display allows and
+# holds a pace of frameMs per frame.
+RENDER_HOOKS_JS = (
+    "  let visualSeed = 0x9e3779b9;\n"
+    "  const visualRandom = () => {\n"
+    "    visualSeed = (visualSeed + 0x6D2B79F5) | 0;\n"
+    "    let t = Math.imul(visualSeed ^ (visualSeed >>> 15), 1 | visualSeed);\n"
+    "    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;\n"
+    "    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;\n"
+    "  };\n"
+    "  window.__eosRenders = 0;\n"
+    "  window.__eosRender = () => {\n"
+    "    const dice = Math.random;\n"
+    "    Math.random = visualRandom;\n"
+    "    try { loopHooks.render(0); } finally { Math.random = dice; }\n"
+    "    window.__eosRenders += 1;\n"
+    "  };\n"
+    "  const nextFrame = () => new Promise((resolve) => {\n"
+    "    const timer = setTimeout(resolve, 50);\n"
+    "    requestAnimationFrame(() => { clearTimeout(timer); resolve(); });\n"
+    "  });\n"
+    "  window.__eosAdvanceSmooth = async (frames, dt, frameMs) => {\n"
+    "    const start = performance.now();\n"
+    "    let drawn = false;\n"
+    "    for (let i = 0; i < frames; i += 1) {\n"
+    "      if (!consommer()) loopHooks.update(dt);\n"
+    "      drawn = performance.now() < start + (i + 1) * frameMs;\n"
+    "      if (drawn) { window.__eosRender(); await nextFrame(); }\n"
+    "    }\n"
+    "    if (!drawn) window.__eosRender();\n"
+    "    const left = start + frames * frameMs - performance.now();\n"
+    "    if (left > 0) await new Promise((resolve) => setTimeout(resolve, left));\n"
+    "    loopHooks.frameEnd();\n"
+    "  };\n"
+)
 
 
 # Training-only curriculum: how equipped a run typically is when it reaches a
@@ -862,10 +907,16 @@ class EclipseEnv:
         slow_mo: int = 0,
         step_seconds: float = 0.15,
         turbo: bool = False,
+        smooth: bool = False,
     ) -> None:
         self.headless = headless
         self.slow_mo = slow_mo
         self.step_seconds = step_seconds
+        # Smooth watching: in turbo with a window, draw every simulated
+        # frame at real-time pace instead of one image per step. The
+        # simulation is the same to the frame; only the drawing and the
+        # wall clock change.
+        self.smooth = smooth and turbo and not headless
         # Turbo drives the game's fixed-step loop synchronously instead of
         # holding keys in real time: same simulated duration per step, but
         # the wall-clock cost drops to the simulation itself.
@@ -1062,6 +1113,7 @@ class EclipseEnv:
                 "frames": self._frames_per_step,
                 "render": not self.headless,
                 "aim": list(aim) if aim is not None else None,
+                "frameMs": 1000.0 / SIM_RATE if self.smooth else 0,
             },
         )
         return self._track(Observation(**data))
@@ -1207,7 +1259,9 @@ class EclipseEnv:
         )
         # Expose the fixed-step loop so turbo mode can drive the simulation
         # synchronously (same hitstop behaviour as the real loop). Real-time
-        # mode keeps the original requestAnimationFrame loop.
+        # mode keeps the original requestAnimationFrame loop. The drawing
+        # hooks keep the dice out of the renderer and add the frame-by-frame
+        # advance of smooth watching.
         patched = patched.replace(
             "  startLoop({\n"
             "    update: (dt) => { pollGamepad(); game.update(dt); },\n"
@@ -1225,7 +1279,7 @@ class EclipseEnv:
             "    }\n"
             "    loopHooks.frameEnd();\n"
             "  };\n"
-            "  window.__eosRender = () => loopHooks.render(0);\n"
+            + RENDER_HOOKS_JS +
             "  if (!window.__eosTurbo) startLoop(loopHooks);",
             1,
         )

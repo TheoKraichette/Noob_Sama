@@ -3,7 +3,8 @@
 The same rules the demonstrations are recorded from (policies.
 heuristic_decision with its options), driving the game through the
 keyboard and the mouse at the game's own pace. --turbo runs the same
-policy at simulation speed instead, still drawing the frames.
+policy at simulation speed instead, one image per step; --smooth adds
+every frame in between, at real-time pace.
 """
 
 from __future__ import annotations
@@ -34,6 +35,11 @@ def parse_args() -> argparse.Namespace:
                         help="Options of the teacher, comma separated (see audit_deaths.py).")
     parser.add_argument("--seed", type=int, default=-1, help="Dungeon seed of episode 1 (-1: the game's clock).")
     parser.add_argument("--turbo", action="store_true", help="Simulation speed instead of real time.")
+    parser.add_argument(
+        "--smooth", action="store_true",
+        help="With --turbo and a window: draw every simulated frame at "
+        "real-time pace instead of one image per step.",
+    )
     parser.add_argument("--headless", action="store_true")
     parser.add_argument(
         "--pace", type=float, default=None,
@@ -49,8 +55,9 @@ def main() -> None:
     options = {flag: False for flag in FLAGS.values()}
     for token in filter(None, args.teacher.split(",")):
         options[FLAGS[token]] = True
+    smooth = args.smooth and args.turbo and not args.headless
     pace = args.pace if args.pace is not None else (args.step_seconds if args.turbo and not args.headless else 0.0)
-    with EclipseEnv(headless=args.headless, turbo=args.turbo, step_seconds=args.step_seconds) as env:
+    with EclipseEnv(headless=args.headless, turbo=args.turbo, step_seconds=args.step_seconds, smooth=smooth) as env:
         for episode in range(1, args.episodes + 1):
             seed = args.seed + episode - 1 if args.seed >= 0 else None
             obs = env.reset(seed=seed)
@@ -59,11 +66,13 @@ def main() -> None:
             steps = 0
             last_room = None
             while not done and steps < args.max_steps:
+                step_started = time.time()
                 action, aim = heuristic_decision(obs, **options)
                 obs, _reward, done, _ = env.step(action, aim)
                 steps += 1
                 if pace:
-                    time.sleep(pace)
+                    # Only the remainder: a smooth step already holds the pace.
+                    time.sleep(max(0.0, pace - (time.time() - step_started)))
                 key = (obs.floor, obs.rooms)
                 if key != last_room:
                     last_room = key
